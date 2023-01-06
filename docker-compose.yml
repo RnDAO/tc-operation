@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    env_file:
+      - ./.env.db
+    volumes:
+      - mongodb_data_container:/data/db
+      - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+
+  tc-appetizer: 
+    image: tc-appetizer:${VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      PORT: $PORT
+    ports:
+      - $PORT:$PORT
+    env_file:
+      - ./.env.proc
+    depends_on:
+      - mongodb
+
+volumes:
+  mongodb_data_container:
