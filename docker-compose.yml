@@ -7,11 +7,18 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env.db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
     volumes:
       - mongodb_data_container:/data/db
       - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+    networks:
+      - appetizer
 
-  tc-appetizer: 
+  tc-appetizer:
     image: tc-appetizer:${VERSION:-latest}
     restart: unless-stopped
     environment:
@@ -20,8 +27,19 @@ services:
       - $PORT:$PORT
     env_file:
       - ./.env.proc
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
     depends_on:
       - mongodb
+    networks:
+      - appetizer
 
 volumes:
   mongodb_data_container:
+
+networks:
+  appetizer:
+   driver: bridge
