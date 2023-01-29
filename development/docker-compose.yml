@@ -1,9 +1,9 @@
 version: '3.9'
 
 services:
-  mongodb:
+  mongodb-dev:
     image: mongo:latest
-    container_name: mongodb
+    container_name: mongodb-dev
     restart: unless-stopped
     env_file:
       - ./.env.db
@@ -14,11 +14,14 @@ services:
         max-file: "20"
     volumes:
       - mongodb_data_container:/data/db
-      - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+      - type: bind
+        source: ../init-mongo.sh
+        target: /docker-entrypoint-initdb.d/init-mongo.sh
+        read_only: true
     networks:
-      - appetizer
+      - appetizer-dev
 
-  tc-appetizer:
+  tc-appetizer-dev:
     image: tc-appetizer:${VERSION:-latest}
     restart: unless-stopped
     environment:
@@ -33,13 +36,13 @@ services:
         max-size: "400k"
         max-file: "20"
     depends_on:
-      - mongodb
+      - mongodb-dev
     networks:
-      - appetizer
+      - appetizer-dev
 
 volumes:
   mongodb_data_container:
 
 networks:
-  appetizer:
+  appetizer-dev:
    driver: bridge
