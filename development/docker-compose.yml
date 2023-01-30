@@ -27,7 +27,7 @@ services:
     environment:
       PORT: $PORT
     ports:
-      - $PORT:$PORT
+      - $HOST:$PORT:$PORT
     env_file:
       - ./.env.proc
     logging:
