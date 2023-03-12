@@ -40,6 +40,41 @@ services:
     networks:
       - appetizer-dev
 
+  tc-botComm-cron-dev:
+    image: tc-botcomm:${VERSION:-latest}
+    restart: always
+    env_file:
+      - ./.env.bot-cron.proc
+    volumes:
+      - type: bind
+        source: ./.env.bot.proc
+        target: /var/www/botComm/.env
+        read_only: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    depends_on:
+      - mongodb-dev
+    networks:
+      - appetizer-dev
+
+  tc-analyzer-cron-dev:
+    image: tc-analyzer:${VERSION:-latest}
+    restart: always
+    env_file:
+      - ./.env.analyzer.proc
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    depends_on:
+      - mongodb-dev
+    networks:
+      - appetizer-dev
+
 volumes:
   mongodb_data_container:
 
