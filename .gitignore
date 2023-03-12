@@ -1,3 +1,4 @@
-.env.db
-.env.proc
-.env.dev
+.env.*
+.env
+!.env.sample
+!.env.*.sample
