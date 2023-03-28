@@ -40,8 +40,29 @@ services:
     networks:
       - appetizer-prod
 
+  neo4j-prod:
+    image: neo4j:5.6
+    restart: unless-stopped
+    ports:
+      - 17474:7474
+      - 17687:7687
+    volumes:
+      - neo4j_conf_container:/conf
+      - neo4j_data_container:/data
+      - neo4j_import_container:/import
+      - neo4j_plugins_container:/plugins
+    environment:
+      # Raise memory limits
+      - NEO4J_dbms_memory_pagecache_size=1G
+      - NEO4J_dbms.memory.heap.initial_size=1G
+      - NEO4J_dbms_memory_heap_max__size=1G
+
 volumes:
   mongodb_data_container:
+  neo4j_data_container:
+  neo4j_conf_container:
+  neo4j_import_container:
+  neo4j_plugins_container:
 
 networks:
   appetizer-prod:
