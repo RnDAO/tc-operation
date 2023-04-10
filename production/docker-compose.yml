@@ -56,6 +56,43 @@ services:
       - NEO4J_dbms_memory_pagecache_size=1G
       - NEO4J_dbms.memory.heap.initial_size=1G
       - NEO4J_dbms_memory_heap_max__size=1G
+    networks:
+      - appetizer-prod
+
+   tc-botComm-cron-prod:
+     image: tc-botcomm:${VERSION:-latest}
+     restart: always
+     env_file:
+       - ./.env.bot-cron.proc
+     volumes:
+       - type: bind
+         source: ./.env.bot.proc
+         target: /var/www/botComm/.env
+         read_only: true
+     logging:
+       driver: "json-file"
+       options:
+         max-size: "400k"
+         max-file: "20"
+     depends_on:
+       - mongodb-prod
+     networks:
+       - appetizer-prod
+
+   tc-analyzer-cron-prod:
+     image: tc-analyzer:${VERSION:-latest}
+     restart: always
+     env_file:
+       - ./.env.analyzer.proc
+     logging:
+       driver: "json-file"
+       options:
+         max-size: "400k"
+         max-file: "20"
+     depends_on:
+       - mongodb-prod
+     networks:
+       - appetizer-prod
 
 volumes:
   mongodb_data_container:
