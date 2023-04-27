@@ -31,11 +31,6 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
     neo4j_user = os.getenv("NEO4J_USER")
     neo4j_password = os.getenv("NEO4J_PASSWORD")
 
-    neo4j_dbName = os.getenv("NEO4J_DB")
-    neo4j_url = os.getenv("NEO4J_URI")
-    neo4j_user = os.getenv("NEO4J_USER")
-    neo4j_password = os.getenv("NEO4J_PASSWORD")
-
     analyzer.set_database_info(
         db_url="",
         db_host=host,
