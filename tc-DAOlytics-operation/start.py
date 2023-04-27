@@ -3,8 +3,10 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from dotenv import load_dotenv
 import json
 import logging
+# from urlparse import parse_qs
+from urllib.parse import urlparse
 
-from rndao_analyzer import RnDaoAnalyzer
+# from rndao_analyzer import RnDaoAnalyzer
 
 PORT_NUMBER = 8080
 
@@ -23,6 +25,16 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
     host = os.getenv("DB_HOST")
     port = os.getenv("DB_PORT")
 
+    neo4j_dbName = os.getenv("NEO4J_DB")
+    neo4j_url = os.getenv("NEO4J_URI")
+    neo4j_user = os.getenv("NEO4J_USER")
+    neo4j_password = os.getenv("NEO4J_PASSWORD")
+
+    neo4j_dbName = os.getenv("NEO4J_DB")
+    neo4j_url = os.getenv("NEO4J_URI")
+    neo4j_user = os.getenv("NEO4J_USER")
+    neo4j_password = os.getenv("NEO4J_PASSWORD")
+
     analyzer.set_database_info(
         db_url="",
         db_host=host,
@@ -30,21 +42,49 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
         db_user=user,
         db_port=port
     )
+    analyzer.set_neo4j_utils(neo4j_dbName=neo4j_dbName,
+                             neo4j_url=neo4j_url,
+                             neo4j_auth=(neo4j_user, neo4j_password))
+
+    ## mongoDB connection
     analyzer.database_connect()
+    
+    ## neo4j db connection
+    analyzer.database_neo4j_connect()
 
     def do_GET(self):
         self.send_response(code=200)
         self.send_header(keyword='Content-type', value='application/json')
         self.end_headers()
 
-        self.analyzer.run_once(None)
+        _, _, path, _, query, _ = urlparse(self.path)
 
+        if path == '/':
+            self.analyzer.run_once(None)
+            self.write_sccess()
+        elif path == '/recompute_analytics':
+            param = query.split('&')
+
+            ## we're getting the id of guild from a string like: `guildId=1534654`
+            guildId = param[0].split('=')[1]
+            self.analyzer.recompute_analytics_on_guilds(guildId)
+            self.write_sccess()
+        else:
+            self.write_fail()
+
+        return
+
+    def write_sccess(self):
         json_to_pass = json.dumps({
             "status": "ok"
         })
         self.wfile.write(json_to_pass.encode('utf-8'))
-
-        return
+    
+    def write_fail(self):
+        json_to_pass = json.dumps({
+            "status": "404"
+        })
+        self.wfile.write(json_to_pass.encode('utf-8'))
 
 
 try:
