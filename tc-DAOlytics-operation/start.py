@@ -5,6 +5,7 @@ import json
 import logging
 # from urlparse import parse_qs
 from urllib.parse import urlparse
+from recompute_subprocess import popen_and_call, notify_backend
 
 # from rndao_analyzer import RnDaoAnalyzer
 
@@ -53,6 +54,10 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
     analyzer.database_neo4j_connect()
 
     def do_GET(self):
+
+        backend_url = os.getenv('NOTIFY_BACKEND_URL')
+        backend_secret = os.getenv('BACKEND_API_KEY')
+
         self.send_response(code=200)
         self.send_header(keyword='Content-type', value='application/json')
         self.end_headers()
@@ -67,7 +72,14 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
 
             ## we're getting the id of guild from a string like: `guildId=1534654`
             guildId = param[0].split('=')[1]
-            self.analyzer.recompute_analytics_on_guilds(guildId)
+
+            ## we need another thread not to block the api and run the analyzer 
+            ## when it ends, it would call backend
+            popen_and_call(on_exit=notify_backend, 
+                           function=self.analyzer.recompute_analytics_on_guilds, 
+                           inputs_function=guildId,
+                           inputs_on_exit=(backend_url, backend_secret) )
+            
             self.write_sccess()
         else:
             self.write_fail()
