@@ -66,18 +66,23 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
             param = query.split('&')
 
             ## we're getting the id of guild from a string like: `guildId=1534654`
-            guildId = param[0].split('=')[1]
+            if len(param_splition) == 2 and len(param) > 1:
+                param_splition = param[0].split('=')
+                guildId = param_splition[1]
 
-            ## we need another thread not to block the api and run the analyzer 
-            ## when it ends, it would call backend
-            popen_and_call(on_exit=notify_backend, 
-                           function=self.analyzer.recompute_analytics_on_guilds, 
-                           inputs_function=guildId,
-                           inputs_on_exit=(backend_url, backend_secret) )
-            
-            self.write_sccess()
+                ## we need another thread not to block the api and run the analyzer 
+                ## when it ends, it would call backend
+                popen_and_call(on_exit=notify_backend, 
+                            function=self.analyzer.recompute_analytics_on_guilds, 
+                            inputs_function=guildId,
+                            inputs_on_exit=(backend_url, backend_secret) )
+                
+                self.write_sccess()
+            else:
+                self.write_fail(extra_info="there must be just one parameter!")
+
         else:
-            self.write_fail()
+            self.write_fail(extra_info="Path Not found!")
 
         return
 
@@ -87,9 +92,10 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
         })
         self.wfile.write(json_to_pass.encode('utf-8'))
     
-    def write_fail(self):
+    def write_fail(self, extra_info=None):
         json_to_pass = json.dumps({
-            "status": "404"
+            "status": "404",
+            "extra_info": extra_info
         })
         self.wfile.write(json_to_pass.encode('utf-8'))
 
