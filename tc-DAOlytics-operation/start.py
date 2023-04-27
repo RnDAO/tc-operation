@@ -7,7 +7,7 @@ import logging
 from urllib.parse import urlparse
 from recompute_subprocess import popen_and_call, notify_backend
 
-# from rndao_analyzer import RnDaoAnalyzer
+from rndao_analyzer import RnDaoAnalyzer
 
 PORT_NUMBER = 8080
 
