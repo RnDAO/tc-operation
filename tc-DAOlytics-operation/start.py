@@ -26,11 +26,6 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
     host = os.getenv("DB_HOST")
     port = os.getenv("DB_PORT")
 
-    neo4j_dbName = os.getenv("NEO4J_DB")
-    neo4j_url = os.getenv("NEO4J_URI")
-    neo4j_user = os.getenv("NEO4J_USER")
-    neo4j_password = os.getenv("NEO4J_PASSWORD")
-
     analyzer.set_database_info(
         db_url="",
         db_host=host,
@@ -38,15 +33,9 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
         db_user=user,
         db_port=port
     )
-    analyzer.set_neo4j_utils(neo4j_dbName=neo4j_dbName,
-                             neo4j_url=neo4j_url,
-                             neo4j_auth=(neo4j_user, neo4j_password))
-
+    
     ## mongoDB connection
     analyzer.database_connect()
-    
-    ## neo4j db connection
-    analyzer.database_neo4j_connect()
 
     def do_GET(self):
 
