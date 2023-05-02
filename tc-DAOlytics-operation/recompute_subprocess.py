@@ -3,14 +3,14 @@ import requests
 
 
 
-def popen_and_call(on_exit, function, inputs_function=None, inputs_on_exit=(None, None)):
+def popen_and_call(on_exit, function, inputs_function=None, inputs_on_exit=(None, None, None)):
     """
     Runs the function in a subprocess.Popen, and then calls the function
     on_exit when the function completes.
     on_exit is a callable object, and popen_args is a list/tuple of args that 
     would give to subprocess.Popen.
 
-    :secrets: tuple of str, first is back-end API url and second is backend API key
+    :inputs_on_exit: tuple of str, first is back-end API url and second is backend API key and the third is the guildId
 
     original code src: https://stackoverflow.com/a/2581943/9070986
     """
@@ -33,13 +33,16 @@ def notify_backend(secrets):
     Parameters:
     -------------
     secrets : tuple of string
-        length must be 2, the first is url and the second is api key
+        length must be 3, the first is url and the second is api key, the third one is guildId
         the url to notify the backend
     
     """
-    ## the message to send when the analytics process ends
-    notification_obj = {'analytics_end': True}
-    url = secrets[0] + '?ApiKey=' + secrets[1]
-    
-    x = requests.post(url=url, json= notification_obj)
-
+    if len(secrets) == 3:
+        ## the message to send when the analytics process ends
+        body_obj = {'isInProgress': False}
+        url = secrets[0] + '/' + secrets[2]
+        
+        x = requests.patch(url=url, json= body_obj, headers={'API-Key': str(secrets[1])})
+        print(f'Back-end response: {x.status_code}')
+    else:
+        print('Wrong input for the notify backend function!')
