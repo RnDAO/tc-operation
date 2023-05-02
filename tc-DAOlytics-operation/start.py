@@ -71,12 +71,14 @@ class AnalyzerHandler(BaseHTTPRequestHandler):
                 if len(param_splition) == 2:
                     guildId = param_splition[1]
 
+                    backend_url += '/api/v1/guilds/bridge-api'
+
                     ## we need another thread not to block the api and run the analyzer 
                     ## when it ends, it would call backend
                     popen_and_call(on_exit=notify_backend, 
                                 function=self.analyzer.recompute_analytics_on_guilds, 
                                 inputs_function=guildId,
-                                inputs_on_exit=(backend_url, backend_secret) )
+                                inputs_on_exit=(backend_url, backend_secret, guildId) )
                     
                     self.write_sccess()
                 else:
