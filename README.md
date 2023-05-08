@@ -1,1 +1,12 @@
 # tc-operation
+
+## Maintenance + Test Coverage
+
+| Repository | Maintainability | Test Coverage |
+|-|-|-|
+| [tc-DAOlytics](https://github.com/RnDAO/tc-DAOlytics) | [![Maintainability](https://api.codeclimate.com/v1/badges/31d78097203ec958c3c8/maintainability)](https://codeclimate.com/repos/6450033e75eb907ee9a34c96/maintainability) | [![Test Coverage](https://api.codeclimate.com/v1/badges/31d78097203ec958c3c8/test_coverage)](https://codeclimate.com/repos/6450033e75eb907ee9a34c96/test_coverage) | 
+| [tc-uiComm](https://github.com/RnDAO/tc-uiComm) | [![Maintainability](https://api.codeclimate.com/v1/badges/35792fb5b2e30c99022c/maintainability)](https://codeclimate.com/github/RnDAO/tc-uiComm/maintainability) | [![Test Coverage](https://api.codeclimate.com/v1/badges/35792fb5b2e30c99022c/test_coverage)](https://codeclimate.com/github/RnDAO/tc-uiComm/test_coverage) |
+| [tc-botComm](https://github.com/RnDAO/tc-botComm) | [![Maintainability](https://api.codeclimate.com/v1/badges/bbe753726b9ecb129382/maintainability)](https://codeclimate.com/github/RnDAO/tc-botComm/maintainability) | [![Test Coverage](https://api.codeclimate.com/v1/badges/bbe753726b9ecb129382/test_coverage)](https://codeclimate.com/github/RnDAO/tc-botComm/test_coverage) |
+| [tc-serverComm](https://github.com/RnDAO/tc-serverComm) | [![Maintainability](https://api.codeclimate.com/v1/badges/a3f4a30c736bae992234/maintainability)](https://codeclimate.com/github/RnDAO/tc-serverComm/maintainability) | [![Test Coverage](https://api.codeclimate.com/v1/badges/a3f4a30c736bae992234/test_coverage)](https://codeclimate.com/github/RnDAO/tc-serverComm/test_coverage) |
+| [tc-dbComm](https://github.com/RnDAO/tc-dbComm) | [![Maintainability](https://api.codeclimate.com/v1/badges/52d516c2ad7c262adb37/maintainability)](https://codeclimate.com/github/RnDAO/tc-dbComm/maintainability) | [![Test Coverage](https://api.codeclimate.com/v1/badges/52d516c2ad7c262adb37/test_coverage)](https://codeclimate.com/github/RnDAO/tc-dbComm/test_coverage) |
+| [tc-messageBroker](https://github.com/RnDAO/tc-messageBroker) | [![Maintainability](https://api.codeclimate.com/v1/badges/3bfc028af8f41cd1cd0c/maintainability)](https://codeclimate.com/github/RnDAO/tc-messageBroker/maintainability) | [![Test Coverage](https://api.codeclimate.com/v1/badges/3bfc028af8f41cd1cd0c/test_coverage)](https://codeclimate.com/github/RnDAO/tc-messageBroker/test_coverage) |
