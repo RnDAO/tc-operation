@@ -11,7 +11,7 @@ class CallBackFunctions:
     def __init__(
         self,
         mongo_creds: dict[str, any],
-        rabbit_mq_creds: dict[str, any],
+        rabbitmq_instance: RabbitMQ,
         neo4j_creds: dict[str, any],
     ) -> None:
         """
@@ -27,20 +27,14 @@ class CallBackFunctions:
              `mongo_host` : str
              `mongo_port` : int
 
-        rabbit_mq_creds : dict[str, any]
-            rabbitMQ credentials,
-            a dictionary representive of
-             `broker_url` : str
-             `port` : int
-             `username` : str
-             `password` : str
+        rabbitmq_instance : RabbitMQ
+            rabbitMQ instance to use its publish method
         """
-        self._rabbit_mq_creds = rabbit_mq_creds
         self._mongo_creds = mongo_creds
         self._neo4j_creds = neo4j_creds
         self.mongo_connection = self._get_mongo_connection(mongo_creds)
 
-        self.rabbit_mq = self._initialize_rabbit_mq()
+        self.rabbit_mq = rabbitmq_instance
         self.analyzer = self._initialize_analyzer()
 
         self.guildId = None
@@ -54,19 +48,6 @@ class CallBackFunctions:
         connection = f"mongodb://{user}:{password}@{host}:{port}"
 
         return connection
-
-    def _initialize_rabbit_mq(self):
-        """
-        initialize the rabbitMQ instance
-        """
-        rabbit_mq = RabbitMQ(
-            broker_url=self._rabbit_mq_creds["broker_url"],
-            port=self._rabbit_mq_creds["port"],
-            username=self._rabbit_mq_creds["username"],
-            password=self._rabbit_mq_creds["password"],
-        )
-
-        return rabbit_mq
 
     def _initialize_analyzer(self):
         """
@@ -89,6 +70,7 @@ class CallBackFunctions:
             neo4j_url=self._neo4j_creds["url"],
             neo4j_user=self._neo4j_creds["user"],
         )
+        analyzer.database_connect()
 
         return analyzer
 
