@@ -22,6 +22,8 @@ WORKDIR "/var/www/analyzer"
 
 COPY ./tc-DAOlytics/analyzer/requirements.txt requirements.txt
 
+RUN pip3 install tc-messageBroker
+
 RUN pip3 install -r requirements.txt
 
 RUN rm -rf /root/.ssh/
