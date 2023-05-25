@@ -1,37 +1,15 @@
-FROM python:3.10
+FROM python:3.10 AS test
 
 RUN apt-get update && apt-get -y upgrade
 
-ARG ssh_prv_key
-ARG ssh_pub_key
+ADD . /root/home/tc-DAOlytics-ops/
 
-EXPOSE 8080
+ADD tc-DAOlytics/analyzer/requirements.txt /root/home/requirements.txt
 
-# Authorize SSH Host
-RUN mkdir -p /root/.ssh && \
-    chmod 0700 /root/.ssh && \
-    ssh-keyscan github.com > /root/.ssh/known_hosts
+RUN pip3 install /root/home/tc-DAOlytics-ops/tc-DAOlytics/analyzer/
 
-# Add the keys and set permissions
-RUN echo "$ssh_prv_key" > /root/.ssh/id_rsa && \
-    echo "$ssh_pub_key" > /root/.ssh/id_rsa.pub && \
-    chmod 600 /root/.ssh/id_rsa && \
-    chmod 600 /root/.ssh/id_rsa.pub
-
-WORKDIR "/var/www/analyzer"
-
-COPY ./tc-DAOlytics/analyzer/requirements.txt requirements.txt
+RUN pip3 install -r /root/home/requirements.txt
 
 RUN pip3 install tc-messageBroker
 
-RUN pip3 install -r requirements.txt
-
-RUN rm -rf /root/.ssh/
-
-RUN rm -rf requirements.txt
-
-COPY ./tc-DAOlytics/ .
-
-COPY ./start_rabbit_mq.py ./analyzer/rndao_analyzer/start_rabbit_mq.py
-
-CMD [ "python3", "./analyzer/rndao_analyzer/start_rabbit_mq.py"]
+CMD ["python3", "/root/home/tc-DAOlytics-ops/start_rabbit_mq.py"]
