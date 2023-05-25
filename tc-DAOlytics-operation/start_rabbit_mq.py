@@ -25,10 +25,7 @@ def analyzer():
 
     rabbit_mq.connect(Queue.DISCORD_ANALYZER)
 
-    rabbit_mq.on_event(
-        Event.DISCORD_ANALYZER.RUN, 
-        callback.analyzer_recompute
-    )
+    rabbit_mq.on_event(Event.DISCORD_ANALYZER.RUN, callback.analyzer_recompute)
 
     rabbit_mq.channel.start_consuming()
 

@@ -37,10 +37,10 @@ def get_mongo_credentials():
     mongo_creds : dict[str, any]
         mongodb credentials
         a dictionary representive of
-            `mongo_user`: str
-            `mongo_password` : str
-            `mongo_host` : str
-            `mongo_port` : int
+            `user`: str
+            `password` : str
+            `host` : str
+            `port` : int
     """
     load_dotenv()
 
@@ -52,3 +52,30 @@ def get_mongo_credentials():
     mongo_creds["port"] = os.getenv("DB_PORT")
 
     return mongo_creds
+
+
+def get_neo4j_credentials():
+    """
+    load neo4j credentials from .env
+
+    Returns:
+    ---------
+    neo4j_creds : dict[str, any]
+        neo4j credentials
+        a dictionary representive of
+            `user` : str
+            `pass` : str
+            `db_name` : str
+            `url` : str
+    """
+
+    load_dotenv()
+
+    neo4j_creds = {}
+
+    neo4j_creds["user"] = os.getenv("NEO4J_USER")
+    neo4j_creds["pass"] = os.getenv("NEO4J_PASSWORD")
+    neo4j_creds["db_name"] = os.getenv("NEO4J_DB")
+    neo4j_creds["url"] = os.getenv("NEO4J_URI")
+
+    return neo4j_creds
