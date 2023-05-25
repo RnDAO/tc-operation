@@ -32,6 +32,6 @@ RUN rm -rf requirements.txt
 
 COPY ./tc-DAOlytics/ .
 
-COPY ./start.py ./analyzer/rndao_analyzer/start.py
+COPY ./start_rabbit_mq.py ./analyzer/rndao_analyzer/start_rabbit_mq.py
 
-CMD [ "python3", "./analyzer/rndao_analyzer/start.py"]
+CMD [ "python3", "./analyzer/rndao_analyzer/start_rabbit_mq.py"]
