@@ -31,6 +31,8 @@ def analyzer():
     rabbit_mq.connect(Queue.DISCORD_ANALYZER)
 
     rabbit_mq.on_event(Event.DISCORD_ANALYZER.RUN, callback.analyzer_recompute)
+    rabbit_mq.on_event(Event.DISCORD_ANALYZER.RUN_ONCE, callback.analyzer_run_once)
+
     if rabbit_mq.channel is None:
         print("Error: was not connected to RabbitMQ broker!")
     else:

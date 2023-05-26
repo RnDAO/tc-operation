@@ -84,6 +84,19 @@ class CallBackFunctions:
             call_function=self._callback_recompute,
             mongo_connection=self.mongo_connection,
         )
+    
+    def analyzer_run_once(self, body: dict[str, any]):
+        self.guildId = body["data"]["guildId"]
+        saga = get_saga(guildId=self.guildId)
+
+        saga.next(
+            publish_method=self.rabbit_mq.publish,
+            call_function=self._callback_run_once,
+            mongo_connection=self.mongo_connection,
+        )
 
     def _callback_recompute(self):
         self.analyzer.recompute_analytics(guildId=self.guildId)
+    
+    def _callback_run_once(self):
+        self.analyzer.run_once(guildId=self.guildId)
