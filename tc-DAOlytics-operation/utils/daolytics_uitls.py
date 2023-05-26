@@ -20,10 +20,10 @@ def get_rabbit_mq_credentials() -> dict[str, any]:
 
     rabbit_mq_creds = {}
 
-    rabbit_mq_creds["broker_url"] = os.getenv("RABBIT_HOST")
-    rabbit_mq_creds["port"] = os.getenv("RABBIT_PORT")
-    rabbit_mq_creds["password"] = os.getenv("RABBIT_PASSWORD")
-    rabbit_mq_creds["username"] = os.getenv("RABBIT_USER")
+    rabbit_mq_creds["broker_url"] = os.getenv("RABBITMQ_HOST")
+    rabbit_mq_creds["port"] = os.getenv("RABBITMQ_PORT")
+    rabbit_mq_creds["password"] = os.getenv("RABBITMQ_PASS")
+    rabbit_mq_creds["username"] = os.getenv("RABBITMQ_USER")
 
     return rabbit_mq_creds
 
