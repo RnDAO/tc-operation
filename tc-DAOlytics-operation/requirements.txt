@@ -1,0 +1,2 @@
+tc-messageBroker
+git+https://{token}@github.com/RnDAO/tc-DAOlytics.git@development/#egg=rndao_analyzer&subdirectory=analyzer

@@ -1,15 +1,11 @@
-FROM python:3.10 AS test
+FROM python:3.10-bullseye AS base
 
-RUN apt-get update && apt-get -y upgrade
+# RUN apt-get update && apt-get -y upgrade
 
-ADD . /root/home/tc-DAOlytics-ops/
+WORKDIR /project
 
-ADD tc-DAOlytics/analyzer/requirements.txt /root/home/requirements.txt
+COPY . . 
 
-RUN pip3 install /root/home/tc-DAOlytics-ops/tc-DAOlytics/analyzer/
+RUN pip3 install -r requirements.txt
 
-RUN pip3 install -r /root/home/requirements.txt
-
-RUN pip3 install tc-messageBroker
-
-CMD ["python3", "/root/home/tc-DAOlytics-ops/start_rabbit_mq.py"]
+CMD ["python3", "start_rabbit_mq.py"]
