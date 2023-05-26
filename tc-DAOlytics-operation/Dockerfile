@@ -1,11 +1,10 @@
 FROM python:3.10-bullseye AS base
-
-# RUN apt-get update && apt-get -y upgrade
-
 WORKDIR /project
-
 COPY . . 
-
 RUN pip3 install -r requirements.txt
 
+FROM base AS test
+CMD ["python3", "coverage", "-m", "pytest", "tests"]
+
+FROM base AS prod
 CMD ["python3", "start_rabbit_mq.py"]
