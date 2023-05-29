@@ -11,7 +11,8 @@ def popen_and_call(
     on_exit is a callable object, and popen_args is a list/tuple of args that
     would give to subprocess.Popen.
 
-    :inputs_on_exit: tuple of str, first is back-end API url and second is backend API key and the third is the guildId
+    :inputs_on_exit: tuple of str, first is back-end API url and
+        second is backend API key and the third is the guildId
 
     original code src: https://stackoverflow.com/a/2581943/9070986
     """
@@ -39,7 +40,10 @@ def notify_backend(secrets):
     Parameters:
     -------------
     secrets : tuple of string
-        length must be 3, the first is url and the second is api key, the third one is guildId
+        length must be 3,
+        - the first is url
+        - the second is api key,
+        - the third one is guildId
         the url to notify the backend
 
     """

@@ -5,7 +5,7 @@ from utils.daolytics_uitls import (
     get_mongo_credentials,
     get_rabbit_mq_credentials,
     get_neo4j_credentials,
-    get_saga_db_location
+    get_saga_db_location,
 )
 from utils import CallBackFunctions
 from tc_messageBroker.message_broker import RabbitMQ
@@ -26,12 +26,11 @@ def analyzer():
         password=rabbit_mq_creds["password"],
     )
 
-
     callback = CallBackFunctions(
-        mongo_creds=mongo_creds, 
-        neo4j_creds=neo4j_creds, 
+        mongo_creds=mongo_creds,
+        neo4j_creds=neo4j_creds,
         rabbitmq_instance=rabbit_mq,
-        saga_mongo_location=saga_creds
+        saga_mongo_location=saga_creds,
     )
 
     rabbit_mq.connect(Queue.DISCORD_ANALYZER)

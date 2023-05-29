@@ -13,7 +13,7 @@ class CallBackFunctions:
         mongo_creds: dict[str, any],
         rabbitmq_instance: RabbitMQ,
         neo4j_creds: dict[str, any],
-        saga_mongo_location : tuple[str, str] 
+        saga_mongo_location: dict[str, str],
     ) -> None:
         """
         callback functions needed to used for DAOlytics
@@ -90,7 +90,7 @@ class CallBackFunctions:
             call_function=self._callback_recompute,
             mongo_connection=self.mongo_connection,
         )
-    
+
     def analyzer_run_once(self, body: dict[str, any]):
         self.guildId = body["data"]["guildId"]
         saga = self._get_saga_instance(guildId=self.guildId)
@@ -103,15 +103,15 @@ class CallBackFunctions:
 
     def _callback_recompute(self):
         self.analyzer.recompute_analytics(guildId=self.guildId)
-    
+
     def _callback_run_once(self):
         self.analyzer.run_once(guildId=self.guildId)
 
     def _get_saga_instance(self, guildId):
         saga = get_saga(
             guildId=guildId,
-            connection_url = self.mongo_connection,
-            db_name = self.saga_mongo_location["db_name"],
-            collection = self.saga_mongo_location["collection_name"]
+            connection_url=self.mongo_connection,
+            db_name=self.saga_mongo_location["db_name"],
+            collection=self.saga_mongo_location["collection_name"],
         )
         return saga
