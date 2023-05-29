@@ -11,3 +11,4 @@ lib64
 pyvenv.cfg
 tc-DAOlytics-operation/main.ipynb
 share/*
+.coverage
