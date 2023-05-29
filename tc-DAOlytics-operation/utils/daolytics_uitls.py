@@ -72,11 +72,12 @@ def get_neo4j_credentials():
     load_dotenv()
 
     neo4j_creds = {}
-
-    neo4j_creds["user"] = os.getenv("NEO4J_USER")
-    neo4j_creds["pass"] = os.getenv("NEO4J_PASSWORD")
     neo4j_creds["db_name"] = os.getenv("NEO4J_DB")
-    neo4j_creds["url"] = os.getenv("NEO4J_URI")
+    neo4j_creds["protocol"] = os.getenv("NEO4J_PROTOCOL")
+    neo4j_creds["host"] = os.getenv("NEO4J_HOST")
+    neo4j_creds["port"] = os.getenv("NEO4J_PORT")
+    neo4j_creds["password"] = os.getenv("NEO4J_PASSWORD")
+    neo4j_creds["user"] = os.getenv("NEO4J_USER")
 
     return neo4j_creds
 

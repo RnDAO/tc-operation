@@ -70,12 +70,8 @@ class CallBackFunctions:
             mongo_db_user=self._mongo_creds["user"],
         )
 
-        analyzer.set_neo4j_database_info(
-            neo4j_db_name=self._neo4j_creds["db_name"],
-            neo4j_password=self._neo4j_creds["pass"],
-            neo4j_url=self._neo4j_creds["url"],
-            neo4j_user=self._neo4j_creds["user"],
-        )
+        analyzer.set_neo4j_database_info(neo4j_creds=self._neo4j_creds)
+
         analyzer.database_connect()
 
         return analyzer
