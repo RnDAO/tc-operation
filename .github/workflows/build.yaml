@@ -28,7 +28,7 @@ jobs:
           echo ${{ env.GITHUB_USER }}
           pip install --upgrade pip
           pip install ruff pytest
-          pip install -r tc-DAOlytics-operation/requirements.txt
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} GITHUB_USER=${{ github.actor }} pip install -r tc-DAOlytics-operation/requirements.txt
       - name: Lint with ruff
         run: |
           # stop the build if there are Python syntax errors or undefined names
