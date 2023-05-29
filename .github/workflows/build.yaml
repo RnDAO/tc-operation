@@ -15,20 +15,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python # ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: "3.10" # ${{ matrix.python-version }}
       - name: Install dependencies
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_USER: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.DAOLYTICS_DEPLOY_KEY }}
         run: |
-          echo ${{ github.actor }}
-          echo ${{ env.GITHUB_USER }}
           pip install --upgrade pip
           pip install ruff pytest
-          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} GITHUB_USER=${{ github.actor }} pip install -r tc-DAOlytics-operation/requirements.txt
+          pip install -r tc-DAOlytics-operation/requirements.txt
       - name: Lint with ruff
         run: |
           # stop the build if there are Python syntax errors or undefined names
