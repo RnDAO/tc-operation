@@ -21,7 +21,7 @@ jobs:
           python-version: "3.10" # ${{ matrix.python-version }}
       - name: Install dependencies
         env:
-          GITHUB_TOKEN: ${{ secrets.DAOLYTICS_DEPLOY_KEY }}
+          GITHUB_TOKEN: ${{ secrets.DAOLYTICS_ACCESS_TOKEN }}
         run: |
           pip install --upgrade pip
           pip install ruff pytest
