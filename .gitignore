@@ -12,3 +12,6 @@ pyvenv.cfg
 tc-DAOlytics-operation/main.ipynb
 share/*
 .coverage
+
+daolytics_deploy_key
+daolytics_deploy_key.pub
