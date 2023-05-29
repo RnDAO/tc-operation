@@ -24,6 +24,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_USER: ${{ github.actor }}
         run: |
+          echo ${{ github.actor }}
+          echo ${{ env.GITHUB_USER }}
           pip install --upgrade pip
           pip install ruff pytest
           pip install -r tc-DAOlytics-operation/requirements.txt
