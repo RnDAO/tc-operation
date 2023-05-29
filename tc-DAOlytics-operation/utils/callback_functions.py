@@ -13,6 +13,7 @@ class CallBackFunctions:
         mongo_creds: dict[str, any],
         rabbitmq_instance: RabbitMQ,
         neo4j_creds: dict[str, any],
+        saga_mongo_location : tuple[str, str] 
     ) -> None:
         """
         callback functions needed to used for DAOlytics
@@ -29,6 +30,9 @@ class CallBackFunctions:
 
         rabbitmq_instance : RabbitMQ
             rabbitMQ instance to use its publish method
+        saga_mongo_location : dict[str, str]
+            the location of saga instance in mongo database
+            must have the dict keys of `db_name` and `collection_name`
         """
         self._mongo_creds = mongo_creds
         self._neo4j_creds = neo4j_creds
@@ -36,6 +40,8 @@ class CallBackFunctions:
 
         self.rabbit_mq = rabbitmq_instance
         self.analyzer = self._initialize_analyzer()
+
+        self.saga_mongo_location = saga_mongo_location
 
         self.guildId = None
 
@@ -77,7 +83,7 @@ class CallBackFunctions:
     def analyzer_recompute(self, body: dict[str, any]):
         self.guildId = body["data"]["guildId"]
 
-        saga = get_saga(guildId=self.guildId)
+        saga = self._get_saga_instance(guildId=self.guildId)
 
         saga.next(
             publish_method=self.rabbit_mq.publish,
@@ -87,7 +93,7 @@ class CallBackFunctions:
     
     def analyzer_run_once(self, body: dict[str, any]):
         self.guildId = body["data"]["guildId"]
-        saga = get_saga(guildId=self.guildId)
+        saga = self._get_saga_instance(guildId=self.guildId)
 
         saga.next(
             publish_method=self.rabbit_mq.publish,
@@ -100,3 +106,12 @@ class CallBackFunctions:
     
     def _callback_run_once(self):
         self.analyzer.run_once(guildId=self.guildId)
+
+    def _get_saga_instance(self, guildId):
+        saga = get_saga(
+            guildId=guildId,
+            connection_url = self.mongo_connection,
+            db_name = self.saga_mongo_location["db_name"],
+            collection = self.saga_mongo_location["collection_name"]
+        )
+        return saga
