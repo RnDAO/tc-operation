@@ -54,15 +54,20 @@ def test_no4j_creds_keys():
     credential_keys = list(neo4j_creds.keys())
 
     assert "user" in credential_keys
-    assert "pass" in credential_keys
+    assert "password" in credential_keys
     assert "db_name" in credential_keys
-    assert "url" in credential_keys
+    assert "protocol" in credential_keys
+    assert "port" in credential_keys
+    assert "host" in credential_keys
+
 
 
 def test_neo4j_creds_values():
     neo4j_creds = get_neo4j_credentials()
 
     assert neo4j_creds["user"] is not None
-    assert neo4j_creds["pass"] is not None
+    assert neo4j_creds["password"] is not None
+    assert neo4j_creds["protocol"] is not None
+    assert neo4j_creds["port"] is not None
     assert neo4j_creds["db_name"] is not None
-    assert neo4j_creds["url"] is not None
+    assert neo4j_creds["host"] is not None
