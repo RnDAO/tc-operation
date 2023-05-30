@@ -2,6 +2,7 @@ from utils.daolytics_uitls import (
     get_mongo_credentials,
     get_neo4j_credentials,
     get_rabbit_mq_credentials,
+    get_saga_db_location
 )
 
 
@@ -71,3 +72,15 @@ def test_neo4j_creds_values():
     assert neo4j_creds["port"] is not None
     assert neo4j_creds["db_name"] is not None
     assert neo4j_creds["host"] is not None
+
+def test_saga_location():
+    saga_creds = get_saga_db_location()
+
+    assert "db_name" in saga_creds.keys()
+    assert "collection_name" in saga_creds.keys()
+
+def test_saga_location_values():
+    saga_creds = get_saga_db_location()
+
+    assert saga_creds["db_name"] is not None
+    assert saga_creds["collection_name"] is not None

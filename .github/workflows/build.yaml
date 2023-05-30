@@ -33,5 +33,22 @@ jobs:
           # default set of ruff rules with GitHub Annotations
           ruff --format=github --target-version=py37 --per-file-ignores="__init__.py:F401" .
       - name: Run tests
+        env:
+          RABBITMQ_HOST: rabbitmq
+          RABBITMQ_PORT: 5672
+          RABBITMQ_USER: guest
+          RABBITMQ_PASS: guest
+          NEO4J_PROTOCOL: bolt
+          NEO4J_HOST: neo4j
+          NEO4J_PORT: 7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: password
+          NEO4J_DB: neo4j
+          RABBIT_HOST: localhost
+          RABBIT_PORT: 5672
+          RABBIT_USER: guest
+          RABBIT_PASSWORD: guest
+          SAGA_DB_NAME: Saga
+          SAGA_DB_COLLECTION: saga
         run: |
           coverage run --omit=tc-DAOlytics-operation/tests/* -m pytest tc-DAOlytics-operation/tests
