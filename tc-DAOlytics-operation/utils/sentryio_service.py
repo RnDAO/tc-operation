@@ -1,7 +1,7 @@
 import sentry_sdk
 
-def set_up_sentryio(dsn, environment, sample_rate=1.0):
 
+def set_up_sentryio(dsn, environment, sample_rate=1.0):
     sentry_sdk.init(
         dsn=dsn,
         environment=environment,

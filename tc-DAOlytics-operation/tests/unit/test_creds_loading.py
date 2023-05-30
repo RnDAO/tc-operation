@@ -3,7 +3,7 @@ from utils.daolytics_uitls import (
     get_neo4j_credentials,
     get_rabbit_mq_credentials,
     get_saga_db_location,
-    get_sentryio_service_creds
+    get_sentryio_service_creds,
 )
 
 
@@ -63,7 +63,6 @@ def test_no4j_creds_keys():
     assert "host" in credential_keys
 
 
-
 def test_neo4j_creds_values():
     neo4j_creds = get_neo4j_credentials()
 
@@ -74,11 +73,13 @@ def test_neo4j_creds_values():
     assert neo4j_creds["db_name"] is not None
     assert neo4j_creds["host"] is not None
 
+
 def test_saga_location():
     saga_creds = get_saga_db_location()
 
     assert "db_name" in saga_creds.keys()
     assert "collection_name" in saga_creds.keys()
+
 
 def test_saga_location_values():
     saga_creds = get_saga_db_location()
@@ -98,4 +99,4 @@ def test_sentryio_creds_values():
     sentry_creds = get_sentryio_service_creds()
 
     assert sentry_creds["dsn"] is not None
-    assert sentry_creds["env"] is not None 
+    assert sentry_creds["env"] is not None
