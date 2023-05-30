@@ -94,3 +94,17 @@ def get_saga_db_location():
     saga_db["collection_name"] = os.getenv("SAGA_DB_COLLECTION")
 
     return saga_db
+
+
+def get_redis_credentials():
+    """
+    get redis credentials
+    """
+    load_dotenv()
+
+    redis_creds = {}
+
+    redis_creds["host"] = os.getenv("REDIS_QUEUE_HOST")
+    redis_creds["port"] = os.getenv("REDIS_QUEUE_PORT")
+
+    return redis_creds

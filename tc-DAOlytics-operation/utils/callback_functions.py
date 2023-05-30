@@ -1,6 +1,9 @@
 from rndao_analyzer import RnDaoAnalyzer
 from tc_messageBroker.message_broker import RabbitMQ
 from tc_messageBroker.rabbit_mq.saga.saga_base import get_saga
+from redis import Redis
+from rq import Queue
+import logging
 
 
 class CallBackFunctions:
@@ -14,6 +17,7 @@ class CallBackFunctions:
         rabbitmq_instance: RabbitMQ,
         neo4j_creds: dict[str, any],
         saga_mongo_location: dict[str, str],
+        redis_creds: dict[str, any],
     ) -> None:
         """
         callback functions needed to used for DAOlytics
@@ -36,12 +40,17 @@ class CallBackFunctions:
         """
         self._mongo_creds = mongo_creds
         self._neo4j_creds = neo4j_creds
-        self.mongo_connection = self._get_mongo_connection(mongo_creds)
+        self.redis_creds = redis_creds
+
+        # self._mongo_creds = {}
+        self._mongo_creds["connection_str"] = self._get_mongo_connection(mongo_creds)
+        self._mongo_creds["db_name"] = saga_mongo_location["db_name"]
+        self._mongo_creds["collection_name"] = saga_mongo_location["collection_name"]
+
+        self.reddis_q = Queue(connection=self._initialize_redis())
 
         self.rabbit_mq = rabbitmq_instance
         self.analyzer = self._initialize_analyzer()
-
-        self.saga_mongo_location = saga_mongo_location
 
         self.guildId = None
 
@@ -54,6 +63,17 @@ class CallBackFunctions:
         connection = f"mongodb://{user}:{password}@{host}:{port}"
 
         return connection
+
+    def _initialize_redis(self):
+        """
+        initialize the redis connection
+
+        """
+        redis = Redis(
+            host=self.redis_creds["host"],
+            port=self.redis_creds["port"],
+        )
+        return redis
 
     def _initialize_analyzer(self):
         """
@@ -77,37 +97,44 @@ class CallBackFunctions:
         return analyzer
 
     def analyzer_recompute(self, body: dict[str, any]):
-        self.guildId = body["data"]["guildId"]
+        self.guildId = body["content"]["data"]["guildId"]
 
         saga = self._get_saga_instance(guildId=self.guildId)
-
-        saga.next(
-            publish_method=self.rabbit_mq.publish,
-            call_function=self._callback_recompute,
-            mongo_connection=self.mongo_connection,
-        )
+        if saga is not None:
+            saga.next(
+                publish_method=self.rabbit_mq.publish,
+                call_function=self._callback_recompute,
+                mongo_creds=self._mongo_creds,
+            )
+        else:
+            logging.warn(f"Stopping the recompute job for guild: {self.guildId}")
 
     def analyzer_run_once(self, body: dict[str, any]):
-        self.guildId = body["data"]["guildId"]
+        self.guildId = body["content"]["data"]["guildId"]
         saga = self._get_saga_instance(guildId=self.guildId)
 
-        saga.next(
-            publish_method=self.rabbit_mq.publish,
-            call_function=self._callback_run_once,
-            mongo_connection=self.mongo_connection,
-        )
+        if saga is not None:
+            saga.next(
+                publish_method=self.rabbit_mq.publish,
+                call_function=self._callback_run_once,
+                mongo_creds=self._mongo_creds,
+            )
+        else:
+            logging.warn(f"Stopping the run_once job for guild: {self.guildId}")
 
     def _callback_recompute(self):
-        self.analyzer.recompute_analytics(guildId=self.guildId)
+        logging.info(f"Callback recompute for {self.guildId} started!")
+        self.reddis_q.enqueue(self.analyzer.recompute_analytics(guildId=self.guildId))
 
     def _callback_run_once(self):
-        self.analyzer.run_once(guildId=self.guildId)
+        logging.info(f"Callback run_once for {self.guildId} started!")
+        self.reddis_q.enqueue(self.analyzer.run_once(guildId=self.guildId))
 
     def _get_saga_instance(self, guildId):
         saga = get_saga(
             guildId=guildId,
-            connection_url=self.mongo_connection,
-            db_name=self.saga_mongo_location["db_name"],
-            collection=self.saga_mongo_location["collection_name"],
+            connection_url=self._mongo_creds["connection_str"],
+            db_name=self._mongo_creds["db_name"],
+            collection=self._mongo_creds["collection_name"],
         )
         return saga
