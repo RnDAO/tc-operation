@@ -3,3 +3,12 @@
 !.env.sample
 !.env.*.sample
 __pycache__
+
+bin/*
+daolytic-ops/*
+lib/*
+lib64
+pyvenv.cfg
+tc-DAOlytics-operation/main.ipynb
+share/*
+.coverage

@@ -1,0 +1,59 @@
+name: Build & Test
+
+on:
+  pull_request:
+  push:
+    branches: [main, development]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # strategy:
+    #   matrix:
+    #     python-version: ["3.10"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python # ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10" # ${{ matrix.python-version }}
+      - name: Install dependencies
+        env:
+          GITHUB_TOKEN: ${{ secrets.DAOLYTICS_ACCESS_TOKEN }}
+        run: |
+          pip install --upgrade pip
+          pip install ruff pytest
+          pip install -r tc-DAOlytics-operation/requirements.txt
+      - name: Lint with ruff
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          ruff --format=github --select=E9,F63,F7,F82 --target-version=py37 .
+          # default set of ruff rules with GitHub Annotations
+          ruff --format=github --target-version=py37 --per-file-ignores="__init__.py:F401" .
+      - name: Run tests
+        env:
+          DB_USER: user
+          DB_HOST: mongod
+          DB_NAME: database
+          DB_PORT: 1547
+          DB_PASSWORD: password
+          RABBITMQ_HOST: rabbitmq
+          RABBITMQ_PORT: 5672
+          RABBITMQ_USER: guest
+          RABBITMQ_PASS: guest
+          NEO4J_PROTOCOL: bolt
+          NEO4J_HOST: neo4j
+          NEO4J_PORT: 7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: password
+          NEO4J_DB: neo4j
+          RABBIT_HOST: localhost
+          RABBIT_PORT: 5672
+          RABBIT_USER: guest
+          RABBIT_PASSWORD: guest
+          SAGA_DB_NAME: Saga
+          SAGA_DB_COLLECTION: saga
+        run: |
+          coverage run --omit=tc-DAOlytics-operation/tests/* -m pytest tc-DAOlytics-operation/tests
