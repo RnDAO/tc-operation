@@ -6,8 +6,10 @@ from utils.daolytics_uitls import (
     get_rabbit_mq_credentials,
     get_neo4j_credentials,
     get_saga_db_location,
+    get_sentryio_service_creds
 )
 from utils import CallBackFunctions
+from utils.sentryio_service import set_up_sentryio
 from tc_messageBroker.message_broker import RabbitMQ
 from tc_messageBroker.rabbit_mq.queue import Queue
 from tc_messageBroker.rabbit_mq.event import Event
@@ -18,6 +20,10 @@ def analyzer():
     mongo_creds = get_mongo_credentials()
     neo4j_creds = get_neo4j_credentials()
     saga_creds = get_saga_db_location()
+    sentry_creds = get_sentryio_service_creds()
+
+    ## sentryio service
+    set_up_sentryio(sentry_creds["dsn"], sentry_creds["env"])
 
     rabbit_mq = RabbitMQ(
         broker_url=rabbit_mq_creds["broker_url"],

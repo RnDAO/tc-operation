@@ -55,5 +55,7 @@ jobs:
           RABBIT_PASSWORD: guest
           SAGA_DB_NAME: Saga
           SAGA_DB_COLLECTION: saga
+          SENTRY_DSN: some_url
+          SENTRY_ENV: local
         run: |
           coverage run --omit=tc-DAOlytics-operation/tests/* -m pytest tc-DAOlytics-operation/tests

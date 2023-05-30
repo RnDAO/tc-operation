@@ -94,3 +94,12 @@ def get_saga_db_location():
     saga_db["collection_name"] = os.getenv("SAGA_DB_COLLECTION")
 
     return saga_db
+
+def get_sentryio_service_creds():
+    load_dotenv()
+
+    sentry_creds = {}
+    sentry_creds["dsn"] = os.getenv("SENTRY_DSN")
+    sentry_creds["env"] = os.getenv("SENTRY_ENV")
+
+    return sentry_creds
