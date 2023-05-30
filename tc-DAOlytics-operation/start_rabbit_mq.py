@@ -7,6 +7,7 @@ from utils.daolytics_uitls import (
     get_neo4j_credentials,
     get_saga_db_location,
     get_sentryio_service_creds,
+    get_redis_credentials,
 )
 from utils import CallBackFunctions
 from utils.sentryio_service import set_up_sentryio
@@ -24,6 +25,7 @@ def analyzer():
 
     ## sentryio service
     set_up_sentryio(sentry_creds["dsn"], sentry_creds["env"])
+    redis_creds = get_redis_credentials()
 
     rabbit_mq = RabbitMQ(
         broker_url=rabbit_mq_creds["broker_url"],
@@ -37,6 +39,7 @@ def analyzer():
         neo4j_creds=neo4j_creds,
         rabbitmq_instance=rabbit_mq,
         saga_mongo_location=saga_creds,
+        redis_creds=redis_creds,
     )
 
     rabbit_mq.connect(Queue.DISCORD_ANALYZER)

@@ -104,3 +104,17 @@ def get_sentryio_service_creds():
     sentry_creds["env"] = os.getenv("SENTRY_ENV")
 
     return sentry_creds
+
+
+def get_redis_credentials():
+    """
+    get redis credentials
+    """
+    load_dotenv()
+
+    redis_creds = {}
+
+    redis_creds["host"] = os.getenv("REDIS_QUEUE_HOST")
+    redis_creds["port"] = os.getenv("REDIS_QUEUE_PORT")
+
+    return redis_creds
