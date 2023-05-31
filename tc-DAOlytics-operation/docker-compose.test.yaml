@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: .
-      target: test
+      target: prod
       dockerfile: Dockerfile
       args:
         - GITHUB_TOKEN=${GITHUB_TOKEN}
