@@ -39,7 +39,7 @@ services:
     networks:
       - development
 
-  redis-discordBot-dev:
+  redis-discord-bot-dev:
     image: redis:7.0.11
     restart: unless-stopped
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
@@ -58,12 +58,12 @@ services:
     networks:
       - development
 
-  redis-discordAnalyzer-dev:
+  redis-discord-analyzer-dev:
     image: redis:7.0.11
     restart: unless-stopped
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
-      - 7379:6379
+      - 8379:6379
     logging:
       driver: "json-file"
       options:
@@ -96,8 +96,12 @@ services:
     networks:
       - development
 
-  tc-serverComm-dev:
-    image: tc-serverComm:${VERSION:-latest}
+  tc-server-comm-dev:
+    build:
+      context: ../../tc-serverComm
+      dockerfile: Dockerfile
+      tags:
+        - tc-server-comm:${VERSION:-latest}
     restart: unless-stopped
     environment:
       PORT: $PORT
@@ -116,8 +120,12 @@ services:
     networks:
       - development
 
-  tc-discordBot-dev:
-    image: tc-botcomm:${VERSION:-latest}
+  tc-discord-bot-dev:
+    build:
+      context: ../../tc-discordBot
+      dockerfile: Dockerfile
+      tags:
+        - tc-discord-bot:${VERSION:-latest}
     restart: unless-stopped
     env_file:
       - ./.env.bot.proc
@@ -127,18 +135,20 @@ services:
         max-size: "400k"
         max-file: "20"
     depends_on:
-      - redis-discordBot-dev
+      - redis-discord-bot-dev
       - rabbitmq-dev
     networks:
       - development
 
-  tc-discordAnalyzer-dev:
+  tc-discord-analyzer-dev:
     build:
       context: ../tc-DAOlytics-operation
       target: prod
       dockerfile: Dockerfile
       args:
         - GITHUB_TOKEN=${GITHUB_TOKEN}
+      tags:
+        - tc-discord-analyzer:${VERSION:-latest}
     restart: unless-stopped
     env_file:
       - ./.env.analyzer.proc
@@ -149,7 +159,7 @@ services:
         max-file: "20"
     depends_on:
       - mongodb-dev
-      - redis-discordAnalyzer-dev
+      - redis-discord-analyzer-dev
       - neo4j-dev
       - rabbitmq-dev
     networks:
