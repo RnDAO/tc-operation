@@ -19,10 +19,87 @@ services:
         target: /docker-entrypoint-initdb.d/init-mongo.sh
         read_only: true
     networks:
-      - appetizer-dev
+      - development
 
-  tc-appetizer-dev:
-    image: tc-appetizer:${VERSION:-latest}
+  rabbitmq-dev:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    ports:
+        - 6672:5672
+        - 25672:15672
+    volumes:
+        - rmq_data_container:/var/lib/rabbitmq/
+    env_file:
+      - ./.env.rmq
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    networks:
+      - development
+
+  redis-discordBot-dev:
+    image: redis:7.0.11
+    restart: unless-stopped
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    ports:
+      - 7379:6379
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    volumes:
+      - mongodb_data_container:/data/db
+      - type: bind
+        source: ./rediss/discordBot.conf
+        target: /usr/local/etc/redis/redis.conf
+        read_only: true
+    networks:
+      - development
+
+  redis-discordAnalyzer-dev:
+    image: redis:7.0.11
+    restart: unless-stopped
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    ports:
+      - 7379:6379
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    volumes:
+      - mongodb_data_container:/data/db
+      - type: bind
+        source: ./rediss/discordAnalyzer.conf
+        target: /usr/local/etc/redis/redis.conf
+        read_only: true
+    networks:
+      - development
+
+  neo4j-dev:
+    image: neo4j:4.4.19
+    restart: unless-stopped
+    ports:
+      - 27474:7474
+      - 27687:7687
+    volumes:
+      - neo4j_conf_container:/var/lib/neo4j/conf
+      - neo4j_data_container:/data
+      - neo4j_import_container:/import
+      - neo4j_plugins_container:/plugins
+    environment:
+      # Raise memory limits
+      - NEO4J_dbms_memory_pagecache_size=1G
+      - NEO4J_dbms.memory.heap.initial_size=1G
+      - NEO4J_dbms_memory_heap_max__size=1G
+    networks:
+      - development
+
+  tc-serverComm-dev:
+    image: tc-serverComm:${VERSION:-latest}
     restart: unless-stopped
     environment:
       PORT: $PORT
@@ -37,12 +114,13 @@ services:
         max-file: "20"
     depends_on:
       - mongodb-dev
+      - neo4j-dev
     networks:
-      - appetizer-dev
+      - development
 
-  tc-botComm-cron-dev:
+  tc-discordBot-dev:
     image: tc-botcomm:${VERSION:-latest}
-    restart: always
+    restart: unless-stopped
     env_file:
       - ./.env.bot-cron.proc
     volumes:
@@ -56,13 +134,19 @@ services:
         max-size: "400k"
         max-file: "20"
     depends_on:
-      - mongodb-dev
+      - redis-discordBot-dev
+      - rabbitmq-dev
     networks:
-      - appetizer-dev
+      - development
 
-  tc-analyzer-cron-dev:
-    image: tc-analyzer:${VERSION:-latest}
-    restart: always
+  tc-discordAnalyzer-dev:
+    build:
+      context: ../tc-DAOlytics-operation
+      target: prod
+      dockerfile: Dockerfile
+      args:
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
+    restart: unless-stopped
     env_file:
       - ./.env.analyzer.proc
     logging:
@@ -72,35 +156,20 @@ services:
         max-file: "20"
     depends_on:
       - mongodb-dev
+      - redis-discordAnalyzer-dev
+      - neo4j-dev
+      - rabbitmq-dev
     networks:
-      - appetizer-dev
-
-  neo4j-dev:
-    image: neo4j:5.6
-    restart: unless-stopped
-    ports:
-      - 27474:7474
-      - 27687:7687
-    volumes:
-      - neo4j_conf_container:/conf
-      - neo4j_data_container:/data
-      - neo4j_import_container:/import
-      - neo4j_plugins_container:/plugins
-    environment:
-      # Raise memory limits
-      - NEO4J_dbms_memory_pagecache_size=1G
-      - NEO4J_dbms.memory.heap.initial_size=1G
-      - NEO4J_dbms_memory_heap_max__size=1G
-    networks:
-      - appetizer-dev
+      - development
 
 volumes:
   mongodb_data_container:
+  rmq_data_container:
   neo4j_data_container:
   neo4j_conf_container:
   neo4j_import_container:
   neo4j_plugins_container:
 
 networks:
-  appetizer-dev:
-   driver: bridge
+  development:
+    driver: bridge
