@@ -12,3 +12,5 @@ pyvenv.cfg
 tc-DAOlytics-operation/main.ipynb
 share/*
 .coverage
+
+dump.rdb

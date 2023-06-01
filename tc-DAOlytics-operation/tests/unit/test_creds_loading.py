@@ -4,6 +4,7 @@ from utils.daolytics_uitls import (
     get_rabbit_mq_credentials,
     get_saga_db_location,
     get_sentryio_service_creds,
+    get_redis_credentials,
 )
 
 
@@ -72,6 +73,24 @@ def test_neo4j_creds_values():
     assert neo4j_creds["port"] is not None
     assert neo4j_creds["db_name"] is not None
     assert neo4j_creds["host"] is not None
+
+
+def test_redis_creds_keys():
+    redis_creds = get_redis_credentials()
+
+    credential_keys = list(redis_creds.keys())
+
+    assert "pass" in credential_keys
+    assert "port" in credential_keys
+    assert "host" in credential_keys
+
+
+def test_redis_creds_values():
+    redis_creds = get_redis_credentials()
+
+    assert redis_creds["pass"] is not None
+    assert redis_creds["port"] is not None
+    assert redis_creds["host"] is not None
 
 
 def test_saga_location():
