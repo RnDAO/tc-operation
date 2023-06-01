@@ -18,6 +18,7 @@ services:
       - MONGODB_PASS=pass
       - REDIS_QUEUE_HOST=redis
       - REDIS_QUEUE_PORT=6379
+      - REDIS_PASSWORD=password
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=root
