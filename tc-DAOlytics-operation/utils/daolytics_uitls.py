@@ -118,5 +118,4 @@ def get_redis_credentials():
     redis_creds["port"] = os.getenv("REDIS_QUEUE_PORT")
     redis_creds["pass"] = os.getenv("REDIS_PASSWORD")
 
-
     return redis_creds
