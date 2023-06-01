@@ -8,4 +8,4 @@ FROM base AS test
 CMD ["python3", "-m", "coverage", "run" ,"-m", "pytest", "tests"]
 
 FROM base AS prod
-CMD ["python3", "start_rabbit_mq.py", "&", "rq", "worker", "--with-scheduler"]
+CMD ["python3", "start_rabbit_mq.py", "&", "python3", "utils", "redis_worker.py"]
