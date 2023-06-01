@@ -98,9 +98,11 @@ class CallBackFunctions:
         return analyzer
 
     def analyzer_recompute(self, body: dict[str, any]):
-        self.guildId = body["content"]["data"]["guildId"]
+        self.sagaId = body["content"]["data"]["uuid"]
 
-        saga = self._get_saga_instance(guildId=self.guildId)
+        saga = self._get_saga_instance(sagaId=self.sagaId)
+        self.guildId = saga.data["guildId"]
+
         if saga is not None:
             saga.next(
                 publish_method=self.rabbit_mq.publish,
@@ -111,8 +113,9 @@ class CallBackFunctions:
             logging.warn(f"Stopping the recompute job for guild: {self.guildId}")
 
     def analyzer_run_once(self, body: dict[str, any]):
-        self.guildId = body["content"]["data"]["guildId"]
-        saga = self._get_saga_instance(guildId=self.guildId)
+        self.guildId = body["content"]["data"]["uuid"]
+        saga = self._get_saga_instance(sagaId=self.sagaId)
+        self.guildId = saga.data["guildId"]
 
         if saga is not None:
             saga.next(
@@ -131,9 +134,9 @@ class CallBackFunctions:
         logging.info(f"Callback run_once for {self.guildId} started!")
         self.reddis_q.enqueue(self.analyzer.run_once(guildId=self.guildId))
 
-    def _get_saga_instance(self, guildId):
+    def _get_saga_instance(self, sagaId: str):
         saga = get_saga(
-            guildId=guildId,
+            sagaId=sagaId,
             connection_url=self._mongo_creds["connection_str"],
             db_name=self._mongo_creds["db_name"],
             collection=self._mongo_creds["collection_name"],
