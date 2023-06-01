@@ -123,6 +123,7 @@ services:
   tc-discord-bot-dev:
     build:
       context: ../../tc-discordBot
+      target: prod
       dockerfile: Dockerfile
       tags:
         - tc-discord-bot:${VERSION:-latest}
