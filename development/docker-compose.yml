@@ -52,7 +52,7 @@ services:
         max-file: "20"
     volumes:
       - type: bind
-        source: ./rediss/discordBot.conf
+        source: ./redis/discordBot.conf
         target: /usr/local/etc/redis/redis.conf
         read_only: true
     networks:
@@ -71,7 +71,7 @@ services:
         max-file: "20"
     volumes:
       - type: bind
-        source: ./rediss/discordAnalyzer.conf
+        source: ./redis/discordAnalyzer.conf
         target: /usr/local/etc/redis/redis.conf
         read_only: true
     networks:
