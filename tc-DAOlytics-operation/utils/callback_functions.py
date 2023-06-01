@@ -98,7 +98,7 @@ class CallBackFunctions:
         return analyzer
 
     def analyzer_recompute(self, body: dict[str, any]):
-        self.sagaId = body["content"]["data"]["uuid"]
+        self.sagaId = body["content"]["uuid"]
 
         saga = self._get_saga_instance(sagaId=self.sagaId)
 
@@ -113,7 +113,8 @@ class CallBackFunctions:
             logging.warn(f"Stopping the recompute job for guild: {self.guildId}")
 
     def analyzer_run_once(self, body: dict[str, any]):
-        self.guildId = body["content"]["data"]["uuid"]
+        self.sagaId = body["content"]["uuid"]
+
         saga = self._get_saga_instance(sagaId=self.sagaId)
 
         if saga is not None:
