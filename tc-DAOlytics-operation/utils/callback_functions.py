@@ -101,9 +101,9 @@ class CallBackFunctions:
         self.sagaId = body["content"]["data"]["uuid"]
 
         saga = self._get_saga_instance(sagaId=self.sagaId)
-        self.guildId = saga.data["guildId"]
 
         if saga is not None:
+            self.guildId = saga.data["guildId"]
             saga.next(
                 publish_method=self.rabbit_mq.publish,
                 call_function=self._callback_recompute,
@@ -115,9 +115,9 @@ class CallBackFunctions:
     def analyzer_run_once(self, body: dict[str, any]):
         self.guildId = body["content"]["data"]["uuid"]
         saga = self._get_saga_instance(sagaId=self.sagaId)
-        self.guildId = saga.data["guildId"]
 
         if saga is not None:
+            self.guildId = saga.data["guildId"]
             saga.next(
                 publish_method=self.rabbit_mq.publish,
                 call_function=self._callback_run_once,
