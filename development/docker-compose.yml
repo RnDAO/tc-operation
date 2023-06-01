@@ -5,6 +5,8 @@ services:
     image: mongo:latest
     container_name: mongodb-dev
     restart: unless-stopped
+    ports:
+      - 37017:27017
     env_file:
       - ./.env.db
     logging:
