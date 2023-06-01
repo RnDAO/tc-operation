@@ -34,11 +34,14 @@ jobs:
           ruff --format=github --target-version=py37 --per-file-ignores="__init__.py:F401" .
       - name: Run tests
         env:
-          DB_USER: user
-          DB_HOST: mongod
-          DB_NAME: database
-          DB_PORT: 1547
-          DB_PASSWORD: password
+          MONGODB_USER: user
+          MONGODB_HOST: mongod
+          MONGODB_NAME: database
+          MONGODB_PORT: 1547
+          MONGODB_PASS: password
+          REDIS_QUEUE_HOST: redis
+          REDIS_QUEUE_PORT: 6379
+          REDIS_PASSWORD: password          
           RABBITMQ_HOST: rabbitmq
           RABBITMQ_PORT: 5672
           RABBITMQ_USER: guest
