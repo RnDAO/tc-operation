@@ -51,7 +51,6 @@ services:
         max-size: "400k"
         max-file: "20"
     volumes:
-      - mongodb_data_container:/data/db
       - type: bind
         source: ./rediss/discordBot.conf
         target: /usr/local/etc/redis/redis.conf
@@ -71,7 +70,6 @@ services:
         max-size: "400k"
         max-file: "20"
     volumes:
-      - mongodb_data_container:/data/db
       - type: bind
         source: ./rediss/discordAnalyzer.conf
         target: /usr/local/etc/redis/redis.conf
@@ -122,12 +120,7 @@ services:
     image: tc-botcomm:${VERSION:-latest}
     restart: unless-stopped
     env_file:
-      - ./.env.bot-cron.proc
-    volumes:
-      - type: bind
-        source: ./.env.bot.proc
-        target: /var/www/botComm/.env
-        read_only: true
+      - ./.env.bot.proc
     logging:
       driver: "json-file"
       options:
