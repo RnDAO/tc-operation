@@ -20,10 +20,10 @@ def get_rabbit_mq_credentials() -> dict[str, any]:
 
     rabbit_mq_creds = {}
 
-    rabbit_mq_creds["broker_url"] = os.getenv("RABBITMQ_HOST")
-    rabbit_mq_creds["port"] = os.getenv("RABBITMQ_PORT")
-    rabbit_mq_creds["password"] = os.getenv("RABBITMQ_PASS")
-    rabbit_mq_creds["username"] = os.getenv("RABBITMQ_USER")
+    rabbit_mq_creds["broker_url"] = os.getenv("RABBIT_HOST")
+    rabbit_mq_creds["port"] = os.getenv("RABBIT_PORT")
+    rabbit_mq_creds["password"] = os.getenv("RABBIT_PASSWORD")
+    rabbit_mq_creds["username"] = os.getenv("RABBIT_USER")
 
     return rabbit_mq_creds
 
@@ -46,10 +46,10 @@ def get_mongo_credentials():
 
     mongo_creds = {}
 
-    mongo_creds["user"] = os.getenv("DB_USER")
-    mongo_creds["password"] = os.getenv("DB_PASSWORD")
-    mongo_creds["host"] = os.getenv("DB_HOST")
-    mongo_creds["port"] = os.getenv("DB_PORT")
+    mongo_creds["user"] = os.getenv("MONGODB_USER")
+    mongo_creds["password"] = os.getenv("MONGODB_PASS")
+    mongo_creds["host"] = os.getenv("MONGODB_HOST")
+    mongo_creds["port"] = os.getenv("MONGODB_PORT")
 
     return mongo_creds
 
@@ -116,5 +116,7 @@ def get_redis_credentials():
 
     redis_creds["host"] = os.getenv("REDIS_QUEUE_HOST")
     redis_creds["port"] = os.getenv("REDIS_QUEUE_PORT")
+    redis_creds["pass"] = os.getenv("REDIS_PASSWORD")
+
 
     return redis_creds

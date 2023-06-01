@@ -72,6 +72,7 @@ class CallBackFunctions:
         redis = Redis(
             host=self.redis_creds["host"],
             port=self.redis_creds["port"],
+            password=self.redis_creds["pass"],
         )
         return redis
 
