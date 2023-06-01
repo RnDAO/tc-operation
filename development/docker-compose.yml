@@ -117,6 +117,7 @@ services:
     depends_on:
       - mongodb-dev
       - neo4j-dev
+      - rabbitmq-dev
     networks:
       - development
 
@@ -136,6 +137,7 @@ services:
         max-size: "400k"
         max-file: "20"
     depends_on:
+      - mongodb-dev
       - redis-discord-bot-dev
       - rabbitmq-dev
     networks:
