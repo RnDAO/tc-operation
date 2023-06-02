@@ -2,25 +2,27 @@
 start the project using rabbitMQ
 """
 from utils.daolytics_uitls import (
-    get_mongo_credentials,
+    # get_mongo_credentials,
     get_rabbit_mq_credentials,
-    get_neo4j_credentials,
-    get_saga_db_location,
+    # get_neo4j_credentials,
+    # get_saga_db_location,
     get_sentryio_service_creds,
     get_redis_credentials,
 )
-from utils import CallBackFunctions
+
+import logging
 from utils.sentryio_service import set_up_sentryio
 from tc_messageBroker.message_broker import RabbitMQ
 from tc_messageBroker.rabbit_mq.queue import Queue
+from rq import Queue as RQ_Queue
 from tc_messageBroker.rabbit_mq.event import Event
+from redis import Redis
+from discord_utils import analyzer_recompute, analyzer_run_once
+import functools
 
 
 def analyzer():
     rabbit_mq_creds = get_rabbit_mq_credentials()
-    mongo_creds = get_mongo_credentials()
-    neo4j_creds = get_neo4j_credentials()
-    saga_creds = get_saga_db_location()
     sentry_creds = get_sentryio_service_creds()
 
     ## sentryio service
@@ -34,18 +36,20 @@ def analyzer():
         password=rabbit_mq_creds["password"],
     )
 
-    callback = CallBackFunctions(
-        mongo_creds=mongo_creds,
-        neo4j_creds=neo4j_creds,
-        rabbitmq_instance=rabbit_mq,
-        saga_mongo_location=saga_creds,
-        redis_creds=redis_creds,
+    redis = Redis(
+        host=redis_creds["host"],
+        port=redis_creds["port"],
+        password=redis_creds["pass"],
     )
+    rq_queue = RQ_Queue(connection=redis)
 
-    rabbit_mq.connect(Queue.DISCORD_ANALYZER, heartbeat=21600)
+    analyzer_recompute = functools.partial(recompute_wrapper, redis_queue=rq_queue)
+    analyzer_run_once = functools.partial(run_once_wrapper, redis_queue=rq_queue)
 
-    rabbit_mq.on_event(Event.DISCORD_ANALYZER.RUN, callback.analyzer_recompute)
-    rabbit_mq.on_event(Event.DISCORD_ANALYZER.RUN_ONCE, callback.analyzer_run_once)
+    rabbit_mq.connect(Queue.DISCORD_ANALYZER, heartbeat=60)
+
+    rabbit_mq.on_event(Event.DISCORD_ANALYZER.RUN, analyzer_recompute)
+    rabbit_mq.on_event(Event.DISCORD_ANALYZER.RUN_ONCE, analyzer_run_once)
 
     if rabbit_mq.channel is None:
         print("Error: was not connected to RabbitMQ broker!")
@@ -53,5 +57,19 @@ def analyzer():
         rabbit_mq.channel.start_consuming()
 
 
+def recompute_wrapper(body: dict[str, any], redis_queue):
+    sagaId = body["content"]["uuid"]
+    logging.info(f"SAGAID:{sagaId} recompute job Adding to queue")
+    redis_queue.enqueue(analyzer_recompute, sagaId)
+
+
+def run_once_wrapper(body: dict[str, any], redis_queue):
+    sagaId = body["content"]["uuid"]
+    logging.info(f"SAGAID:{sagaId} run_once job Adding to queue")
+    redis_queue.enqueue(analyzer_run_once, sagaId)
+
+
 if __name__ == "__main__":
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.INFO)
     analyzer()

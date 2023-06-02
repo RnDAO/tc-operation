@@ -3,6 +3,7 @@ from rq import Worker
 from daolytics_uitls import get_redis_credentials
 import logging
 
+
 def worker_exception_handler(job, exc_type, exc_value, traceback):
     logging.error(" ========= RQ Exception =========")
     logging.error(f"JOB: {job}")
@@ -23,8 +24,10 @@ if __name__ == "__main__":
 
     r = redis.Redis(host=host, port=port, password=password)
     worker = Worker(
-        queues=["default"], 
-        connection=r,
-        exception_handlers=worker_exception_handler
+        queues=["default"], connection=r, exception_handlers=worker_exception_handler
     )
-    worker.work(with_scheduler=True)
+    try:
+        worker.work(with_scheduler=True)
+    except KeyboardInterrupt:
+        worker.clean_registries()
+        worker.stop_scheduler()
