@@ -2,10 +2,7 @@
 start the project using rabbitMQ
 """
 from utils.daolytics_uitls import (
-    # get_mongo_credentials,
     get_rabbit_mq_credentials,
-    # get_neo4j_credentials,
-    # get_saga_db_location,
     get_sentryio_service_creds,
     get_redis_credentials,
 )
@@ -44,8 +41,12 @@ def analyzer():
 
     rq_queue = RQ_Queue(connection=redis, default_timeout=1800)
 
-    analyzer_recompute = functools.partial(recompute_wrapper, redis_queue=rq_queue)
-    analyzer_run_once = functools.partial(run_once_wrapper, redis_queue=rq_queue)
+    analyzer_recompute = functools.partial(
+        recompute_wrapper, redis_queue=rq_queue, rabbit_mq_creds=rabbit_mq_creds
+    )
+    analyzer_run_once = functools.partial(
+        run_once_wrapper, redis_queue=rq_queue, rabbit_mq_creds=rabbit_mq_creds
+    )
 
     rabbit_mq.connect(Queue.DISCORD_ANALYZER, heartbeat=60)
 
@@ -58,16 +59,20 @@ def analyzer():
         rabbit_mq.channel.start_consuming()
 
 
-def recompute_wrapper(body: dict[str, any], redis_queue):
+def recompute_wrapper(
+    body: dict[str, any], redis_queue: RQ_Queue, rabbit_mq_creds: dict[str, any]
+):
     sagaId = body["content"]["uuid"]
     logging.info(f"SAGAID:{sagaId} recompute job Adding to queue")
-    redis_queue.enqueue(analyzer_recompute, sagaId)
+    redis_queue.enqueue(analyzer_recompute, sagaId=sagaId, rabbit_creds=rabbit_mq_creds)
 
 
-def run_once_wrapper(body: dict[str, any], redis_queue):
+def run_once_wrapper(
+    body: dict[str, any], redis_queue: RQ_Queue, rabbit_mq_creds: dict[str, any]
+):
     sagaId = body["content"]["uuid"]
     logging.info(f"SAGAID:{sagaId} run_once job Adding to queue")
-    redis_queue.enqueue(analyzer_run_once, sagaId)
+    redis_queue.enqueue(analyzer_run_once, sagaId=sagaId, rabbit_creds=rabbit_mq_creds)
 
 
 if __name__ == "__main__":

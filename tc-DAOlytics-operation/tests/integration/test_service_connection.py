@@ -1,12 +1,13 @@
 from utils.daolytics_uitls import (
-    get_mongo_credentials,
-    get_neo4j_credentials,
+    # get_mongo_credentials,
+    # get_neo4j_credentials,
     get_rabbit_mq_credentials,
 )
 
 # from utils.callback_functions import CallBackFunctions
 from tc_messageBroker.message_broker import RabbitMQ
-import pytest
+
+# import pytest
 
 
 def test_rabbit_mq_connect():
