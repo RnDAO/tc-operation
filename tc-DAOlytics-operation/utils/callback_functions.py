@@ -4,6 +4,10 @@ from tc_messageBroker.rabbit_mq.saga.saga_base import get_saga
 from redis import Redis
 from rq import Queue
 import logging
+from .discord_utils import (
+    analyzer_recompute,
+    analyzer_run_once,
+)
 
 
 class CallBackFunctions:
@@ -85,7 +89,7 @@ class CallBackFunctions:
         analyzer = RnDaoAnalyzer()
 
         analyzer.set_mongo_database_info(
-            mongo_db_host=self._mongo_creds["user"],
+            mongo_db_host=self._mongo_creds["host"],
             mongo_db_password=self._mongo_creds["password"],
             mongo_db_port=self._mongo_creds["port"],
             mongo_db_user=self._mongo_creds["user"],
@@ -129,11 +133,16 @@ class CallBackFunctions:
 
     def _callback_recompute(self):
         logging.info(f"Callback recompute for {self.guildId} started!")
-        self.reddis_q.enqueue(self.analyzer.recompute_analytics(guildId=self.guildId))
+        # self.reddis_q.enqueue(self.analyzer.recompute_analytics, guildId=self.guildId)
+        # self.reddis_q.enqueue(analyzer_recompute, self.guildId)
+        self.reddis_q.enqueue(sample_hello)
+        logging.info("AFTER ENQUEUING!")
+
 
     def _callback_run_once(self):
         logging.info(f"Callback run_once for {self.guildId} started!")
-        self.reddis_q.enqueue(self.analyzer.run_once(guildId=self.guildId))
+        # self.reddis_q.enqueue(self.analyzer.run_once, guildId=self.guildId)
+        ## TODO: add the run_once
 
     def _get_saga_instance(self, sagaId: str):
         saga = get_saga(
@@ -143,3 +152,6 @@ class CallBackFunctions:
             collection=self._mongo_creds["collection_name"],
         )
         return saga
+
+def sample_hello():
+    logging.info("Hello world!")

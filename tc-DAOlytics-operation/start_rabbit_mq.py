@@ -42,7 +42,7 @@ def analyzer():
         redis_creds=redis_creds,
     )
 
-    rabbit_mq.connect(Queue.DISCORD_ANALYZER)
+    rabbit_mq.connect(Queue.DISCORD_ANALYZER, heartbeat=21600)
 
     rabbit_mq.on_event(Event.DISCORD_ANALYZER.RUN, callback.analyzer_recompute)
     rabbit_mq.on_event(Event.DISCORD_ANALYZER.RUN_ONCE, callback.analyzer_run_once)
