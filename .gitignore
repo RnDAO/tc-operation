@@ -16,3 +16,5 @@ share/*
 .coverage
 
 dump.rdb
+
+**/.env
