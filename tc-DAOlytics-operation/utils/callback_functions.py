@@ -85,7 +85,7 @@ class CallBackFunctions:
         analyzer = RnDaoAnalyzer()
 
         analyzer.set_mongo_database_info(
-            mongo_db_host=self._mongo_creds["user"],
+            mongo_db_host=self._mongo_creds["host"],
             mongo_db_password=self._mongo_creds["password"],
             mongo_db_port=self._mongo_creds["port"],
             mongo_db_user=self._mongo_creds["user"],
