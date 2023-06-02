@@ -17,13 +17,6 @@ def prepare_rabbit_mq(rabbit_creds):
 
     return rabbitmq
 
-
-def thread_safe_publish(rebbit_instance):
-    """
-    do publishing in a thread safe format
-    """
-
-
 def analyzer_recompute(sagaId: str, rabbit_creds: dict[str, any]):
     analyzer_init = AnalyzerInit()
     analyzer, mongo_creds = analyzer_init.get_analyzer()
