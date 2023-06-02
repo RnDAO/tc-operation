@@ -3,7 +3,7 @@ from utils.daolytics_uitls import (
     get_neo4j_credentials,
     get_rabbit_mq_credentials,
 )
-from utils.callback_functions import CallBackFunctions
+# from utils.callback_functions import CallBackFunctions
 from tc_messageBroker.message_broker import RabbitMQ
 import pytest
 
