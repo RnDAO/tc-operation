@@ -5,6 +5,8 @@ services:
     image: mongo:latest
     container_name: mongodb-dev
     restart: unless-stopped
+    ports:
+      - 37017:27017
     env_file:
       - ./.env.db
     logging:
@@ -52,7 +54,7 @@ services:
         max-file: "20"
     volumes:
       - type: bind
-        source: ./rediss/discordBot.conf
+        source: ./redis/discordBot.conf
         target: /usr/local/etc/redis/redis.conf
         read_only: true
     networks:
@@ -71,7 +73,7 @@ services:
         max-file: "20"
     volumes:
       - type: bind
-        source: ./rediss/discordAnalyzer.conf
+        source: ./redis/discordAnalyzer.conf
         target: /usr/local/etc/redis/redis.conf
         read_only: true
     networks:
@@ -83,6 +85,8 @@ services:
     ports:
       - 27474:7474
       - 27687:7687
+    env_file:
+      - ./.env.neo4j
     volumes:
       - neo4j_conf_container:/var/lib/neo4j/conf
       - neo4j_data_container:/data
@@ -117,6 +121,7 @@ services:
     depends_on:
       - mongodb-dev
       - neo4j-dev
+      - rabbitmq-dev
     networks:
       - development
 
