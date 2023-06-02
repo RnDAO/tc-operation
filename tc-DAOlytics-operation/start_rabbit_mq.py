@@ -17,7 +17,7 @@ from tc_messageBroker.rabbit_mq.queue import Queue
 from rq import Queue as RQ_Queue
 from tc_messageBroker.rabbit_mq.event import Event
 from redis import Redis
-from discord_utils import analyzer_recompute, analyzer_run_once
+from discord_utils import analyzer_recompute, analyzer_run_once, hellow
 import functools
 
 
@@ -60,7 +60,9 @@ def analyzer():
 def recompute_wrapper(body: dict[str, any], redis_queue):
     sagaId = body["content"]["uuid"]
     logging.info(f"SAGAID:{sagaId} recompute job Adding to queue")
-    redis_queue.enqueue(analyzer_recompute, sagaId)
+    # redis_queue.enqueue(analyzer_recompute, sagaId)
+    redis_queue.enqueue(hellow, sagaId)
+
 
 
 def run_once_wrapper(body: dict[str, any], redis_queue):

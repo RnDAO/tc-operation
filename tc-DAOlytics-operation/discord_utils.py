@@ -1,4 +1,4 @@
-from .analyzer_init import AnalyzerInit
+from analyzer_init import AnalyzerInit
 from tc_messageBroker.rabbit_mq.saga.saga_base import get_saga
 import logging
 
@@ -57,3 +57,6 @@ def get_saga_instance(sagaId: str, connection: str, saga_db: str, saga_collectio
         collection=saga_collection,
     )
     return saga
+
+def hellow(text):
+    print(f"Hello {text}")
