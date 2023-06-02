@@ -19,9 +19,7 @@ class AnalyzerInit:
         Returns:
         ---------
         analyzer : RnDaoAnalyzer
-        mongo_connection : str
-        saga_db : str
-        saga_collection : str
+        mongo_creds : dict[str, any]
         """
         analyzer = RnDaoAnalyzer()
 
@@ -29,8 +27,10 @@ class AnalyzerInit:
         mongo_creds = get_mongo_credentials()
         neo4j_creds = get_neo4j_credentials()
         saga_mongo_location = get_saga_db_location()
-        saga_db = saga_mongo_location["db_name"]
-        saga_collection = saga_mongo_location["collection_name"]
+
+        mongo_creds["db_name"] = saga_mongo_location["db_name"]
+        mongo_creds["collection_name"] = saga_mongo_location["collection_name"]
+        mongo_creds["connection_str"] = self._get_mongo_connection(mongo_creds)
 
         analyzer.set_mongo_database_info(
             mongo_db_host=mongo_creds["host"],
@@ -41,9 +41,7 @@ class AnalyzerInit:
         analyzer.set_neo4j_database_info(neo4j_creds=neo4j_creds)
         analyzer.database_connect()
 
-        mongo_connection = self._get_mongo_connection(mongo_creds=mongo_creds)
-
-        return analyzer, mongo_connection, saga_db, saga_collection
+        return analyzer, mongo_creds
 
     def _get_mongo_connection(self, mongo_creds: dict[str, any]):
         user = mongo_creds["user"]

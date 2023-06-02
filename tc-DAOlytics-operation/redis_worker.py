@@ -1,6 +1,6 @@
 import redis
 from rq import Worker
-from daolytics_uitls import get_redis_credentials
+from utils.daolytics_uitls import get_redis_credentials
 import logging
 
 
