@@ -14,7 +14,7 @@ from tc_messageBroker.rabbit_mq.queue import Queue
 from rq import Queue as RQ_Queue
 from tc_messageBroker.rabbit_mq.event import Event
 from redis import Redis
-from discord_utils import analyzer_recompute, analyzer_run_once
+from discord_utils import analyzer_recompute, analyzer_run_once, publish_on_success
 import functools
 
 
@@ -54,8 +54,9 @@ def analyzer():
     rabbit_mq.on_event(Event.DISCORD_ANALYZER.RUN_ONCE, analyzer_run_once)
 
     if rabbit_mq.channel is None:
-        print("Error: was not connected to RabbitMQ broker!")
+        logging.info("Error: was not connected to RabbitMQ broker!")
     else:
+        logging.info("Started Consuming!")
         rabbit_mq.channel.start_consuming()
 
 
@@ -64,7 +65,13 @@ def recompute_wrapper(
 ):
     sagaId = body["content"]["uuid"]
     logging.info(f"SAGAID:{sagaId} recompute job Adding to queue")
-    redis_queue.enqueue(analyzer_recompute, sagaId=sagaId, rabbit_creds=rabbit_mq_creds)
+
+    redis_queue.enqueue(
+        analyzer_recompute,
+        sagaId=sagaId,
+        rabbit_creds=rabbit_mq_creds,
+        on_success=publish_on_success,
+    )
 
 
 def run_once_wrapper(
@@ -72,7 +79,12 @@ def run_once_wrapper(
 ):
     sagaId = body["content"]["uuid"]
     logging.info(f"SAGAID:{sagaId} run_once job Adding to queue")
-    redis_queue.enqueue(analyzer_run_once, sagaId=sagaId, rabbit_creds=rabbit_mq_creds)
+    redis_queue.enqueue(
+        analyzer_run_once,
+        sagaId=sagaId,
+        rabbit_creds=rabbit_mq_creds,
+        on_success=publish_on_success,
+    )
 
 
 if __name__ == "__main__":
