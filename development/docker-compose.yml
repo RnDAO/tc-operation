@@ -147,10 +147,33 @@ services:
     networks:
       - development
 
-  tc-discord-analyzer-dev:
+  tc-discord-analyzer-server-dev:
     build:
       context: ../tc-DAOlytics-operation
-      target: prod
+      target: prod-server
+      dockerfile: Dockerfile
+      args:
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
+      tags:
+        - tc-discord-analyzer:${VERSION:-latest}
+    restart: unless-stopped
+    env_file:
+      - ./.env.analyzer.proc
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    depends_on:
+      - redis-discord-analyzer-dev
+      - rabbitmq-dev
+    networks:
+      - development
+
+  tc-discord-analyzer-worker-dev:
+    build:
+      context: ../tc-DAOlytics-operation
+      target: prod-worker
       dockerfile: Dockerfile
       args:
         - GITHUB_TOKEN=${GITHUB_TOKEN}
@@ -168,7 +191,6 @@ services:
       - mongodb-dev
       - redis-discord-analyzer-dev
       - neo4j-dev
-      - rabbitmq-dev
     networks:
       - development
 
