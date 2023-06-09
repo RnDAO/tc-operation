@@ -20,5 +20,5 @@ services:
       - tools
 
 networks:
-  development:
+  tools:
     driver: bridge
