@@ -14,11 +14,12 @@ services:
         max-size: "400k"
         max-file: "20"
     volumes:
-      - ./portainer-data:/data/portainer
+      - portainer_data:/data/portainer
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - tools
-  vol
+  volumes:
+    - portainer_data
 
 networks:
   tools:
