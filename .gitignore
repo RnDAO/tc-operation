@@ -1,5 +1,7 @@
 .env.*
 .env
+*.conf
+!*.conf.sample
 !.env.sample
 !.env.*.sample
 __pycache__
@@ -14,3 +16,5 @@ share/*
 .coverage
 
 dump.rdb
+
+**/.env
