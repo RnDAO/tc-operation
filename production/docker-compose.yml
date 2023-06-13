@@ -25,7 +25,6 @@ services:
     image: rabbitmq:3-management
     restart: unless-stopped
     ports:
-        - 5672:5672
         - 15672:15672
     volumes:
         - rmq_data_container:/var/lib/rabbitmq/
@@ -43,8 +42,6 @@ services:
     image: redis:7.0.11
     restart: unless-stopped
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    ports:
-      - 7378:6379
     logging:
       driver: "json-file"
       options:
@@ -62,8 +59,6 @@ services:
     image: redis:7.0.11
     restart: unless-stopped
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    ports:
-      - 8378:6379
     logging:
       driver: "json-file"
       options:
@@ -82,7 +77,6 @@ services:
     restart: unless-stopped
     ports:
       - 17474:7474
-      - 17687:7687
     env_file:
       - ./.env.neo4j
     volumes:
