@@ -1,4 +1,4 @@
-tc-messageBroker
+tc-messageBroker==1.2.1
 sentry-sdk
 rq
 redis
