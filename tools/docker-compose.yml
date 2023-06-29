@@ -18,8 +18,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - tools
-  volumes:
-    - portainer_data
+      
+volumes:
+  - portainer_data
 
 networks:
   tools:
