@@ -20,7 +20,8 @@ services:
       - tools
       
 volumes:
-  - portainer_data
+  portainer_data:
+    external: false
 
 networks:
   tools:
