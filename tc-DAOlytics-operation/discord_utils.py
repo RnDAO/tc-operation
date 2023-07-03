@@ -106,7 +106,7 @@ def publish_on_success(connection, result, *args, **kwargs):
             rabbitmq.publish(
                 queue_name=tx.queue,
                 event=tx.event,
-                content={"uuid": sagaId, "data": "calling from on_success"},
+                content={"uuid": sagaId, "data": saga.data},
             )
     except Exception as exp:
         logging.info(f"Exception occured in job on_success callback: {exp}")
