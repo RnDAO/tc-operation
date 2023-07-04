@@ -40,6 +40,7 @@ class AnalyzerInit:
         )
         analyzer.set_neo4j_database_info(neo4j_creds=neo4j_creds)
         analyzer.database_connect()
+        analyzer.setup_neo4j_metrics()
 
         return analyzer, mongo_creds
 
