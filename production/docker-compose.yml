@@ -78,7 +78,7 @@ services:
     image: neo4j:4.4.19
     restart: unless-stopped
     ports:
-      - 17474:7474
+      - 17687:7687
     env_file:
       - ./.env.neo4j
     volumes:
