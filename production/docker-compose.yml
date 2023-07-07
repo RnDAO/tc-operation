@@ -80,6 +80,7 @@ services:
     ports:
       - 17687:7687
       - 17474:7474
+      - 17473:7473
     env_file:
       - ./.env.neo4j
     volumes:
