@@ -79,6 +79,7 @@ services:
     restart: unless-stopped
     ports:
       - 17687:7687
+      - 17474:7474
     env_file:
       - ./.env.neo4j
     volumes:
