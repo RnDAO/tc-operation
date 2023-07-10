@@ -194,6 +194,24 @@ services:
     networks:
       - development
 
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      - grafana-net
+    volumes:
+      - grafana-volume
+
+  graphite:
+    image: graphiteapp/graphite-statsd
+    container_name: graphite
+    restart: always
+    networks:
+      - grafana-net
+
 volumes:
   mongodb_data_container:
   rmq_data_container:
@@ -201,7 +219,10 @@ volumes:
   neo4j_conf_container:
   neo4j_import_container:
   neo4j_plugins_container:
+  grafana_volume:
 
 networks:
   development:
+    driver: bridge
+  grafana-net:
     driver: bridge
