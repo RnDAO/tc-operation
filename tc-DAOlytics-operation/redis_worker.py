@@ -27,7 +27,7 @@ if __name__ == "__main__":
         queues=["default"], connection=r, exception_handlers=worker_exception_handler
     )
     try:
-        worker.work(with_scheduler=True)
+        worker.work(with_scheduler=True, max_jobs=2)
     except KeyboardInterrupt:
         worker.clean_registries()
         worker.stop_scheduler()
