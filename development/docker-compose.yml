@@ -220,6 +220,7 @@ volumes:
   neo4j_import_container:
   neo4j_plugins_container:
   grafana_volume:
+    external: true
 
 networks:
   development:
