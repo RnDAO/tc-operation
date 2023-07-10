@@ -217,8 +217,14 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/daemon.json:/etc/docker/daemon.json
+      - type: bind
+        source: ./prometheus/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        read_only: true
+      - type: bind
+        source: ./prometheus/daemon.json
+        target: /etc/docker/daemon.json
+        read_only: true
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     networks:
