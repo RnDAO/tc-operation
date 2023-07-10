@@ -217,7 +217,8 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./prometheus:/etc/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/daemon.json:/etc/docker/daemon.json
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     networks:
