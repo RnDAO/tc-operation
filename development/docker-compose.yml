@@ -203,7 +203,7 @@ services:
     networks:
       - grafana-net
     volumes:
-      - grafana-volume
+      - grafana_volume
 
   graphite:
     image: graphiteapp/graphite-statsd
