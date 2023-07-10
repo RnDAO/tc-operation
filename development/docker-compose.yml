@@ -223,10 +223,11 @@ services:
         read_only: true
     command:
       - --config.file=/etc/prometheus/prometheus.yml
-    networks:
-      - grafana-net
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    network_mode: "host"
+    # networks:
+    #   - grafana-net
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
 
 
 volumes:
