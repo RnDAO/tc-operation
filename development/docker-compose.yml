@@ -229,6 +229,8 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
     networks:
       - grafana-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 
 volumes:
