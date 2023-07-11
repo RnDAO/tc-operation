@@ -27,10 +27,10 @@ services:
     image: rabbitmq:3-management
     restart: unless-stopped
     ports:
-        - 6672:5672
-        - 25672:15672
+      - 6672:5672
+      - 25672:15672
     volumes:
-        - rmq_data_container:/var/lib/rabbitmq/
+      - rmq_data_container:/var/lib/rabbitmq/
     env_file:
       - ./.env.rmq
     logging:
@@ -44,7 +44,7 @@ services:
   redis-discord-bot-dev:
     image: redis:7.0.11
     restart: unless-stopped
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
     ports:
       - 7379:6379
     logging:
@@ -63,7 +63,7 @@ services:
   redis-discord-analyzer-dev:
     image: redis:7.0.11
     restart: unless-stopped
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
     ports:
       - 8379:6379
     logging:
@@ -199,7 +199,7 @@ services:
     container_name: grafana
     restart: always
     ports:
-      - 3000:3000
+      - 3001:3000
     networks:
       - grafana-net
     volumes:
@@ -213,22 +213,35 @@ services:
       - grafana-net
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:latest
+    container_name: prometheus
     ports:
       - 9090:9090
-    volumes:
-      - type: bind
-        source: ./prometheus/prometheus.yml
-        target: /etc/prometheus/prometheus.yml
-        read_only: true
     command:
       - --config.file=/etc/prometheus/prometheus.yml
-    network_mode: "host"
-    # networks:
-    #   - grafana-net
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - cadvisor
 
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis
+
+  redis-cadvisor:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - 9379:6379
 
 volumes:
   mongodb_data_container:
