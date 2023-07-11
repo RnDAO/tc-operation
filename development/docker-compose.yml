@@ -210,10 +210,10 @@ services:
     container_name: graphite
     restart: always
     volumes:
-      - graphite_volume/opt/graphite/conf:/opt/graphite/conf
-      - graphite_volume/opt/graphite/data:/opt/graphite/data
-      - graphite_volume/opt/graphite/storage:/opt/graphite/storage
-      - graphite_volume/opt/statsd:/opt/statsd
+      - graphite_volume:/opt/graphite/conf
+      - graphite_volume:/opt/graphite/data
+      - graphite_volume:/opt/graphite/storage
+      - graphite_volume:/opt/statsd
     networks:
       - monitoring
 
