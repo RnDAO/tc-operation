@@ -199,7 +199,7 @@ services:
     container_name: grafana
     restart: always
     ports:
-      - 3001:3000
+      - 3000:3000
     networks:
       - monitoring
     volumes:
@@ -258,6 +258,7 @@ volumes:
   neo4j_plugins_container:
   grafana_volume:
     external: true
+
 
 networks:
   development:
