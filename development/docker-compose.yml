@@ -200,15 +200,20 @@ services:
     restart: always
     ports:
       - 3000:3000
-    networks:
-      - monitoring
     volumes:
       - grafana_volume:/grafana
+    networks:
+      - monitoring
 
   graphite:
     image: graphiteapp/graphite-statsd
     container_name: graphite
     restart: always
+    volumes:
+      - graphite_volume/opt/graphite/conf:/opt/graphite/conf
+      - graphite_volume/opt/graphite/data:/opt/graphite/data
+      - graphite_volume/opt/graphite/storage:/opt/graphite/storage
+      - graphite_volume/opt/statsd:/opt/statsd
     networks:
       - monitoring
 
@@ -257,7 +262,7 @@ volumes:
   neo4j_import_container:
   neo4j_plugins_container:
   grafana_volume:
-    external: true
+  graphite_volume:
 
 
 networks:
