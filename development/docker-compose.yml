@@ -201,7 +201,7 @@ services:
     ports:
       - 3001:3000
     networks:
-      - grafana-net
+      - monitoring
     volumes:
       - grafana_volume:/grafana
 
@@ -210,7 +210,7 @@ services:
     container_name: graphite
     restart: always
     networks:
-      - grafana-net
+      - monitoring
 
   prometheus:
     image: prom/prometheus:latest
@@ -223,6 +223,8 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - cadvisor
+    networks:
+      - monitoring
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -235,13 +237,17 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     depends_on:
-      - redis
+      - redis-cadvisor
+    networks:
+      - monitoring
 
   redis-cadvisor:
     image: redis:latest
     container_name: redis
     ports:
       - 9379:6379
+    networks:
+      - monitoring
 
 volumes:
   mongodb_data_container:
@@ -256,5 +262,5 @@ volumes:
 networks:
   development:
     driver: bridge
-  grafana-net:
+  monitoring:
     driver: bridge
