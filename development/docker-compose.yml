@@ -262,7 +262,7 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - ./loki/config/loki-config.yaml:/etc/loki/loki-config.yaml
+      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
       - loki_volume:/data/loki
     command: -config.file=/etc/loki/loki-config.yaml
 
@@ -272,7 +272,7 @@ services:
     restart: unless-stopped
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ./promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+      - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
     command: -config.file=/etc/promtail/promtail-config.yaml
 
 volumes:
