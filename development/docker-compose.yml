@@ -77,8 +77,8 @@ services:
       - neo4j_plugins:/plugins
     environment:
       # Raise memory limits
-      # - NEO4J_server.memory.heap.initial_size=2G
-      # - NEO4J_server.memory.heap.max_size=4G
+      - NEO4J_server.memory.heap.initial_size=2G
+      - NEO4J_server.memory.heap.max_size=4G
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
     networks:
