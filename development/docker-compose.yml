@@ -71,7 +71,7 @@ services:
     env_file:
       - ./.env.neo4j
     volumes:
-      - neo4j_conf_container:/var/lib/neo4j/conf
+      # - neo4j_conf_container:/var/lib/neo4j/conf
       - neo4j_data_container:/data
       - neo4j_import_container:/import
       - neo4j_plugins_container:/plugins
