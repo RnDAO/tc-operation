@@ -172,18 +172,6 @@ services:
     networks:
       - monitoring
 
-  graphite:
-    image: graphiteapp/graphite-statsd
-    container_name: graphite
-    restart: always
-    volumes:
-      - graphite_volume:/opt/graphite/conf
-      - graphite_volume:/opt/graphite/data
-      - graphite_volume:/opt/graphite/storage
-      - graphite_volume:/opt/statsd
-    networks:
-      - monitoring
-
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
