@@ -12,7 +12,7 @@ scrape_configs:
 - job_name: containers
   static_configs:
   - targets:
-      - 0.0.0.0
+      - localhost
     labels:
       job: containerlogs
       __path__: /var/lib/docker/containers/*/*log
