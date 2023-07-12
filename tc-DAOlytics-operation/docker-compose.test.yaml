@@ -54,3 +54,7 @@ services:
       - RABBITMQ_DEFAULT_PASS=pass
   neo4j:
     image: "neo4j"
+    environment:
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
