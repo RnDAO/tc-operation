@@ -246,6 +246,13 @@ services:
     networks:
       - monitoring
 
+  docker_state_exporter:
+    image: karugaru/docker_state_exporter
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+
 volumes:
   mongodb_data_container:
   rmq_data_container:
