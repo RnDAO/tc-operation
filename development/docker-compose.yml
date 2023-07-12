@@ -1,66 +1,66 @@
 version: '3.9'
 
 services:
-  mongodb-dev:
-    image: mongo:latest
-    container_name: mongodb-dev
-    restart: unless-stopped
-    ports:
-      - 37017:27017
-    env_file:
-      - ./.env.db
-    volumes:
-      - mongodb_data_container:/data/db
-      - type: bind
-        source: ../init-mongo.sh
-        target: /docker-entrypoint-initdb.d/init-mongo.sh
-        read_only: true
-    networks:
-      - development
+  # mongodb-dev:
+  #   image: mongo:latest
+  #   container_name: mongodb-dev
+  #   restart: unless-stopped
+  #   ports:
+  #     - 37017:27017
+  #   env_file:
+  #     - ./.env.db
+  #   volumes:
+  #     - mongodb_data_container:/data/db
+  #     - type: bind
+  #       source: ../init-mongo.sh
+  #       target: /docker-entrypoint-initdb.d/init-mongo.sh
+  #       read_only: true
+  #   networks:
+  #     - development
 
-  rabbitmq-dev:
-    image: rabbitmq:3-management
-    restart: unless-stopped
-    ports:
-      - 6672:5672
-      - 25672:15672
-    volumes:
-      - rmq_data_container:/var/lib/rabbitmq/
-    env_file:
-      - ./.env.rmq
+  # rabbitmq-dev:
+  #   image: rabbitmq:3-management
+  #   restart: unless-stopped
+  #   ports:
+  #     - 6672:5672
+  #     - 25672:15672
+  #   volumes:
+  #     - rmq_data_container:/var/lib/rabbitmq/
+  #   env_file:
+  #     - ./.env.rmq
     
-    networks:
-      - development
+  #   networks:
+  #     - development
 
-  redis-discord-bot-dev:
-    image: redis:7.0.11
-    restart: unless-stopped
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    ports:
-      - 7379:6379
+  # redis-discord-bot-dev:
+  #   image: redis:7.0.11
+  #   restart: unless-stopped
+  #   command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+  #   ports:
+  #     - 7379:6379
     
-    volumes:
-      - type: bind
-        source: ./redis/discordBot.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-    networks:
-      - development
+  #   volumes:
+  #     - type: bind
+  #       source: ./redis/discordBot.conf
+  #       target: /usr/local/etc/redis/redis.conf
+  #       read_only: true
+  #   networks:
+  #     - development
 
-  redis-discord-analyzer-dev:
-    image: redis:7.0.11
-    restart: unless-stopped
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    ports:
-      - 8379:6379
+  # redis-discord-analyzer-dev:
+  #   image: redis:7.0.11
+  #   restart: unless-stopped
+  #   command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+  #   ports:
+  #     - 8379:6379
     
-    volumes:
-      - type: bind
-        source: ./redis/discordAnalyzer.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-    networks:
-      - development
+  #   volumes:
+  #     - type: bind
+  #       source: ./redis/discordAnalyzer.conf
+  #       target: /usr/local/etc/redis/redis.conf
+  #       read_only: true
+  #   networks:
+  #     - development
 
   neo4j-dev:
     image: neo4j:5.9.0
@@ -77,180 +77,180 @@ services:
       - neo4j_plugins:/plugins
     environment:
       # Raise memory limits
-      - NEO4J_server.memory.heap.initial_size=2G
-      - NEO4J_server.memory.heap.max_size=4G
+      # - NEO4J_server.memory.heap.initial_size=2G
+      # - NEO4J_server.memory.heap.max_size=4G
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
     networks:
       - development
 
-  tc-server-comm-dev:
-    build:
-      context: ../../tc-serverComm
-      dockerfile: Dockerfile
-      tags:
-        - tc-server-comm:${VERSION:-latest}
-    restart: unless-stopped
-    environment:
-      PORT: $PORT
-    ports:
-      - $HOST:$PORT:$PORT
-    env_file:
-      - ./.env.proc
+  # tc-server-comm-dev:
+  #   build:
+  #     context: ../../tc-serverComm
+  #     dockerfile: Dockerfile
+  #     tags:
+  #       - tc-server-comm:${VERSION:-latest}
+  #   restart: unless-stopped
+  #   environment:
+  #     PORT: $PORT
+  #   ports:
+  #     - $HOST:$PORT:$PORT
+  #   env_file:
+  #     - ./.env.proc
     
-    depends_on:
-      - mongodb-dev
-      - neo4j-dev
-      - rabbitmq-dev
-    networks:
-      - development
+  #   depends_on:
+  #     - mongodb-dev
+  #     - neo4j-dev
+  #     - rabbitmq-dev
+  #   networks:
+  #     - development
 
-  tc-discord-bot-dev:
-    build:
-      context: ../../tc-discordBot
-      target: prod
-      dockerfile: Dockerfile
-      tags:
-        - tc-discord-bot:${VERSION:-latest}
-    restart: unless-stopped
-    env_file:
-      - ./.env.bot.proc
+  # tc-discord-bot-dev:
+  #   build:
+  #     context: ../../tc-discordBot
+  #     target: prod
+  #     dockerfile: Dockerfile
+  #     tags:
+  #       - tc-discord-bot:${VERSION:-latest}
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ./.env.bot.proc
     
-    depends_on:
-      - mongodb-dev
-      - redis-discord-bot-dev
-      - rabbitmq-dev
-    networks:
-      - development
+  #   depends_on:
+  #     - mongodb-dev
+  #     - redis-discord-bot-dev
+  #     - rabbitmq-dev
+  #   networks:
+  #     - development
 
-  tc-discord-analyzer-server-dev:
-    build:
-      context: ../tc-DAOlytics-operation
-      target: prod-server
-      dockerfile: Dockerfile
-      args:
-        - GITHUB_TOKEN=${GITHUB_TOKEN}
-      tags:
-        - tc-discord-analyzer:${VERSION:-latest}
-    restart: unless-stopped
-    env_file:
-      - ./.env.analyzer.proc
+  # tc-discord-analyzer-server-dev:
+  #   build:
+  #     context: ../tc-DAOlytics-operation
+  #     target: prod-server
+  #     dockerfile: Dockerfile
+  #     args:
+  #       - GITHUB_TOKEN=${GITHUB_TOKEN}
+  #     tags:
+  #       - tc-discord-analyzer:${VERSION:-latest}
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ./.env.analyzer.proc
     
-    depends_on:
-      - redis-discord-analyzer-dev
-      - rabbitmq-dev
-    networks:
-      - development
+  #   depends_on:
+  #     - redis-discord-analyzer-dev
+  #     - rabbitmq-dev
+  #   networks:
+  #     - development
 
-  tc-discord-analyzer-worker-dev:
-    build:
-      context: ../tc-DAOlytics-operation
-      target: prod-worker
-      dockerfile: Dockerfile
-      args:
-        - GITHUB_TOKEN=${GITHUB_TOKEN}
-      tags:
-        - tc-discord-analyzer:${VERSION:-latest}
-    restart: unless-stopped
-    env_file:
-      - ./.env.analyzer.proc
-    depends_on:
-      - mongodb-dev
-      - redis-discord-analyzer-dev
-      - neo4j-dev
-    networks:
-      - development
+  # tc-discord-analyzer-worker-dev:
+  #   build:
+  #     context: ../tc-DAOlytics-operation
+  #     target: prod-worker
+  #     dockerfile: Dockerfile
+  #     args:
+  #       - GITHUB_TOKEN=${GITHUB_TOKEN}
+  #     tags:
+  #       - tc-discord-analyzer:${VERSION:-latest}
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ./.env.analyzer.proc
+  #   depends_on:
+  #     - mongodb-dev
+  #     - redis-discord-analyzer-dev
+  #     - neo4j-dev
+  #   networks:
+  #     - development
 
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
-    restart: always
-    ports:
-      - 3000:3000
-    volumes:
-      - grafana_volume:/var/lib/grafana
-    networks:
-      - monitoring
+  # grafana:
+  #   image: grafana/grafana
+  #   container_name: grafana
+  #   restart: always
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - grafana_volume:/var/lib/grafana
+  #   networks:
+  #     - monitoring
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    ports:
-      - 9090:9090
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_volume:/prometheus
-    depends_on:
-      - cadvisor
-    networks:
-      - monitoring
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: prometheus
+  #   ports:
+  #     - 9090:9090
+  #   command:
+  #     - --config.file=/etc/prometheus/prometheus.yml
+  #   volumes:
+  #     - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  #     - prometheus_volume:/prometheus
+  #   depends_on:
+  #     - cadvisor
+  #   networks:
+  #     - monitoring
 
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    ports:
-      - 8080:8080
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    depends_on:
-      - redis-cadvisor
-    networks:
-      - monitoring
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor:latest
+  #   container_name: cadvisor
+  #   ports:
+  #     - 8080:8080
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #   depends_on:
+  #     - redis-cadvisor
+  #   networks:
+  #     - monitoring
 
-  redis-cadvisor:
-    image: redis:latest
-    container_name: redis
-    ports:
-      - 9379:6379
-    networks:
-      - monitoring
+  # redis-cadvisor:
+  #   image: redis:latest
+  #   container_name: redis
+  #   ports:
+  #     - 9379:6379
+  #   networks:
+  #     - monitoring
     
-  loki:
-    container_name: loki
-    image: grafana/loki:2.8.0
-    restart: unless-stopped
-    ports:
-      - "3100:3100"
-    volumes:
-      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
-      - loki_volume:/data/loki
-    command: -config.file=/etc/loki/loki-config.yaml
-    networks:
-      - monitoring
+  # loki:
+  #   container_name: loki
+  #   image: grafana/loki:2.8.0
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3100:3100"
+  #   volumes:
+  #     - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
+  #     - loki_volume:/data/loki
+  #   command: -config.file=/etc/loki/loki-config.yaml
+  #   networks:
+  #     - monitoring
 
-  promtail:
-    container_name: promtail
-    image: grafana/promtail:2.8.0
-    restart: unless-stopped
-    volumes:
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
-    command: -config.file=/etc/promtail/promtail-config.yaml
-    networks:
-      - monitoring
+  # promtail:
+  #   container_name: promtail
+  #   image: grafana/promtail:2.8.0
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  #     - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+  #   command: -config.file=/etc/promtail/promtail-config.yaml
+  #   networks:
+  #     - monitoring
 
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: node-exporter
-    restart: unless-stopped
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    # expose:
-    #   - 9100
-    networks:
-      - monitoring
+  # node-exporter:
+  #   image: prom/node-exporter:latest
+  #   container_name: node-exporter
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /:/rootfs:ro
+  #   command:
+  #     - '--path.procfs=/host/proc'
+  #     - '--path.rootfs=/rootfs'
+  #     - '--path.sysfs=/host/sys'
+  #     - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+  #   # expose:
+  #   #   - 9100
+  #   networks:
+  #     - monitoring
 
 volumes:
   mongodb_data_container:
