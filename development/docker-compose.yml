@@ -265,6 +265,8 @@ services:
       - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
       - loki_volume:/data/loki
     command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - monitoring
 
   promtail:
     container_name: promtail
@@ -274,6 +276,8 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
     command: -config.file=/etc/promtail/promtail-config.yaml
+    networks:
+      - monitoring
 
 volumes:
   mongodb_data_container:
