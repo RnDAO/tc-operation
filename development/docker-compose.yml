@@ -235,6 +235,7 @@ services:
       - monitoring
 
   docker_state_exporter:
+    container_name: state-exporter
     image: karugaru/docker_state_exporter
     volumes:
       - type: bind
