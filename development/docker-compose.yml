@@ -63,7 +63,7 @@ services:
       - development
 
   neo4j-dev:
-    image: neo4j:5.3.0
+    image: neo4j:4.4.19
     restart: unless-stopped
     ports:
       - 27474:7474
@@ -84,7 +84,7 @@ services:
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
-      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+      # - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
     networks:
       - development
 
