@@ -10,10 +10,9 @@ services:
     env_file:
       - ./.env.db
     logging:
-      driver: "json-file"
+      driver: loki
       options:
-        max-size: "400k"
-        max-file: "20"
+        loki-url: "http://loki:3100/loki/api/v1/push"
     volumes:
       - mongodb_data_container:/data/db
       - type: bind
@@ -34,10 +33,9 @@ services:
     env_file:
       - ./.env.rmq
     logging:
-      driver: "json-file"
+      driver: loki
       options:
-        max-size: "400k"
-        max-file: "20"
+        loki-url: "http://loki:3100/loki/api/v1/push"
     networks:
       - development
 
@@ -48,10 +46,9 @@ services:
     ports:
       - 7379:6379
     logging:
-      driver: "json-file"
+      driver: loki
       options:
-        max-size: "400k"
-        max-file: "20"
+        loki-url: "http://loki:3100/loki/api/v1/push"
     volumes:
       - type: bind
         source: ./redis/discordBot.conf
@@ -67,10 +64,9 @@ services:
     ports:
       - 8379:6379
     logging:
-      driver: "json-file"
+      driver: loki
       options:
-        max-size: "400k"
-        max-file: "20"
+        loki-url: "http://loki:3100/loki/api/v1/push"
     volumes:
       - type: bind
         source: ./redis/discordAnalyzer.conf
@@ -87,6 +83,10 @@ services:
       - 27687:7687
     env_file:
       - ./.env.neo4j
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://loki:3100/loki/api/v1/push"
     volumes:
       - neo4j_conf_container:/var/lib/neo4j/conf
       - neo4j_data_container:/data
@@ -114,10 +114,9 @@ services:
     env_file:
       - ./.env.proc
     logging:
-      driver: "json-file"
+      driver: loki
       options:
-        max-size: "400k"
-        max-file: "20"
+        loki-url: "http://loki:3100/loki/api/v1/push"
     depends_on:
       - mongodb-dev
       - neo4j-dev
@@ -136,10 +135,9 @@ services:
     env_file:
       - ./.env.bot.proc
     logging:
-      driver: "json-file"
+      driver: loki
       options:
-        max-size: "400k"
-        max-file: "20"
+        loki-url: "http://loki:3100/loki/api/v1/push"
     depends_on:
       - mongodb-dev
       - redis-discord-bot-dev
@@ -160,10 +158,9 @@ services:
     env_file:
       - ./.env.analyzer.proc
     logging:
-      driver: "json-file"
+      driver: loki
       options:
-        max-size: "400k"
-        max-file: "20"
+        loki-url: "http://loki:3100/loki/api/v1/push"
     depends_on:
       - redis-discord-analyzer-dev
       - rabbitmq-dev
@@ -183,10 +180,9 @@ services:
     env_file:
       - ./.env.analyzer.proc
     logging:
-      driver: "json-file"
+      driver: loki
       options:
-        max-size: "400k"
-        max-file: "20"
+        loki-url: "http://loki:3100/loki/api/v1/push"
     depends_on:
       - mongodb-dev
       - redis-discord-analyzer-dev
@@ -268,16 +264,16 @@ services:
     networks:
       - monitoring
 
-  promtail:
-    container_name: promtail
-    image: grafana/promtail:2.8.0
-    restart: unless-stopped
-    volumes:
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
-    command: -config.file=/etc/promtail/promtail-config.yaml
-    networks:
-      - monitoring
+  # promtail:
+  #   container_name: promtail
+  #   image: grafana/promtail:2.8.0
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  #     - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+  #   command: -config.file=/etc/promtail/promtail-config.yaml
+  #   networks:
+  #     - monitoring
 
 volumes:
   mongodb_data_container:
