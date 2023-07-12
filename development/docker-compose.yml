@@ -74,7 +74,7 @@ services:
       # - neo4j_conf:/var/lib/neo4j/conf
       - neo4j_data:/data
       - neo4j_import:/import
-      - neo4j_plugins:/plugins
+      # - neo4j_plugins:/plugins
     environment:
       # Raise memory limits
       - NEO4J_server.memory.heap.initial_size=2G
