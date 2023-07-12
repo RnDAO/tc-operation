@@ -9,10 +9,6 @@ services:
       - 37017:27017
     env_file:
       - ./.env.db
-    logging:
-      driver: json-file
-      options:
-        label_regex: ^.+
     volumes:
       - mongodb_data_container:/data/db
       - type: bind
