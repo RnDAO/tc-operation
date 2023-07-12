@@ -240,6 +240,8 @@ services:
       - type: bind
         source: /var/run/docker.sock
         target: /var/run/docker.sock
+    networks:
+      - monitoring
 
 volumes:
   mongodb_data_container:
