@@ -34,6 +34,9 @@ services:
     volumes:
       - ./grafana/provisioning/:/etc/grafana/provisioning
       - grafana_volume:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
     networks:
       - monitoring
     <<: *logging
@@ -48,6 +51,7 @@ services:
       - prometheus_volume:/prometheus
     depends_on:
       - cadvisor
+      - node-exporter
     networks:
       - monitoring
     <<: *logging
