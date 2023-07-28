@@ -75,7 +75,7 @@ services:
       - production
 
   neo4j-prod:
-    image: neo4j:4.4.19
+    image: neo4j:5.9.0
     restart: unless-stopped
     ports:
       - 27474:7474
@@ -83,15 +83,16 @@ services:
     env_file:
       - ./.env.neo4j
     volumes:
-      - neo4j_conf_container:/var/lib/neo4j/conf
-      - neo4j_data_container:/data
-      - neo4j_import_container:/import
-      - neo4j_plugins_container:/plugins
+      - neo4j_conf:/var/lib/neo4j/conf
+      - neo4j_data:/data
+      - neo4j_import:/import
+      - neo4j_plugins:/plugins
     environment:
       # Raise memory limits
-      - NEO4J_dbms_memory_pagecache_size=1G
-      - NEO4J_dbms.memory.heap.initial_size=1G
-      - NEO4J_dbms_memory_heap_max__size=1G
+      - NEO4J_server.memory.heap.initial_size=2G
+      - NEO4J_server.memory.heap.max_size=4G
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
     networks:
       - production
 
@@ -189,13 +190,112 @@ services:
     networks:
       - production
 
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_volume:/var/lib/grafana
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_volume:/prometheus
+    depends_on:
+      - cadvisor
+    networks:
+      - monitoring
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis-cadvisor
+    networks:
+      - monitoring
+
+  redis-cadvisor:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - 9379:6379
+    networks:
+      - monitoring
+    
+  loki:
+    container_name: loki
+    image: grafana/loki:2.8.0
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
+      - loki_data:/data/loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - monitoring
+
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:2.8.0
+    restart: unless-stopped
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    networks:
+      - monitoring
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    # expose:
+    #   - 9100
+    networks:
+      - monitoring
+
 volumes:
   mongodb_data_container:
   rmq_data_container:
-  neo4j_data_container:
-  neo4j_conf_container:
-  neo4j_import_container:
-  neo4j_plugins_container:
+  # neo4j_data_container:
+  # neo4j_conf_container:
+  # neo4j_import_container:
+  # neo4j_plugins_container:
+  grafana_volume:
+  prometheus_volume:
+  loki_data:
+  neo4j_data:
+  neo4j_import:
+  neo4j_plugins:
+  neo4j_conf:
 
 networks:
   production:
