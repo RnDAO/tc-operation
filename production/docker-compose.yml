@@ -300,3 +300,5 @@ volumes:
 networks:
   production:
     driver: bridge
+  monitoring:
+    driver: bridge
