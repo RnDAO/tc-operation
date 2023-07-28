@@ -5,13 +5,17 @@ name: monitoring
 networks:
   monitoring:
     name: monitoring
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.22.22.0/16
 
 x-logging:
   &logging
   logging:
     driver: loki
     options:
-      loki-url: http://loki:3100/loki/api/v1/push
+      loki-url: http://172.22.22.15:3100/loki/api/v1/push
       loki-retries: 5
       loki-batch-size: 400
 
@@ -78,7 +82,8 @@ services:
       - loki_volume:/data/loki
     command: -config.file=/etc/loki/loki-config.yaml
     networks:
-      - monitoring
+      monitoring:
+        ipv4_address: 172.22.22.15
     <<: *logging
 
   node-exporter:
