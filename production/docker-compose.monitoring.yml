@@ -4,14 +4,15 @@ name: monitoring
 
 networks:
   monitoring:
-    driver: bridge
+    name: monitoring
+    external: true
 
 x-logging:
   &logging
   logging:
     driver: loki
     options:
-      loki-url: http://host.docker.internal:3100/loki/api/v1/push
+      loki-url: http://loki:3100/loki/api/v1/push
       loki-retries: 5
       loki-batch-size: 400
 
@@ -71,7 +72,7 @@ services:
   loki:
     container_name: loki
     image: grafana/loki:2.8.0
-    network_mode: host
+    # network_mode: host
     restart: unless-stopped
     volumes:
       - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml

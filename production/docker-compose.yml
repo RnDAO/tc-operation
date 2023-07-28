@@ -5,7 +5,7 @@ x-logging:
   logging:
     driver: loki
     options:
-      loki-url: http://host.docker.internal:3100/loki/api/v1/push
+      loki-url: http://loki:3100/loki/api/v1/push
       loki-retries: 5
       loki-batch-size: 400
 
@@ -31,6 +31,7 @@ services:
         read_only: true
     networks:
       - production
+      - monitoring
 
   rabbitmq-prod:
     image: rabbitmq:3-management
@@ -43,6 +44,7 @@ services:
       - ./.env.rmq
     networks:
       - production
+      - monitoring
     <<: *logging
 
   redis-discord-bot-prod:
@@ -56,6 +58,7 @@ services:
         read_only: true
     networks:
       - production
+      - monitoring
     <<: *logging
 
   redis-discord-analyzer-prod:
@@ -69,6 +72,7 @@ services:
         read_only: true
     networks:
       - production
+      - monitoring
     <<: *logging
 
   neo4j-prod:
@@ -92,6 +96,7 @@ services:
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
     networks:
       - production
+      - monitoring
     <<: *logging
 
   tc-server-comm-prod:
@@ -113,6 +118,7 @@ services:
       - rabbitmq-prod
     networks:
       - production
+      - monitoring
     <<: *logging
 
   tc-discord-bot-prod:
@@ -131,6 +137,7 @@ services:
       - rabbitmq-prod
     networks:
       - production
+      - monitoring
     <<: *logging
 
   tc-discord-analyzer-server-prod:
@@ -170,6 +177,7 @@ services:
       - neo4j-prod
     networks:
       - production
+      - monitoring
     <<: *logging
 
 volumes:
