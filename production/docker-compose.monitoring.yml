@@ -88,6 +88,8 @@ services:
     networks:
       monitoring:
         ipv4_address: 172.22.22.15
+    expose:
+      - 3100
     <<: *logging
 
   node-exporter:
