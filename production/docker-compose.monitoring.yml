@@ -80,6 +80,8 @@ services:
     container_name: loki
     image: grafana/loki:2.8.0
     restart: unless-stopped
+    ports:
+      - 3100
     volumes:
       - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
       - loki_volume:/data/loki
