@@ -194,3 +194,6 @@ volumes:
 networks:
   production:
     driver: bridge
+  monitoring:
+    name: monitoring
+    external: true

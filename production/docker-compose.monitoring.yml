@@ -5,7 +5,6 @@ name: monitoring
 networks:
   monitoring:
     name: monitoring
-    external: true
 
 x-logging:
   &logging
