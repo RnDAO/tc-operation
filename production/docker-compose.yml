@@ -31,7 +31,6 @@ services:
         read_only: true
     networks:
       - production
-      - monitoring
 
   rabbitmq-prod:
     image: rabbitmq:3-management
@@ -44,7 +43,6 @@ services:
       - ./.env.rmq
     networks:
       - production
-      - monitoring
     <<: *logging
 
   redis-discord-bot-prod:
@@ -58,7 +56,6 @@ services:
         read_only: true
     networks:
       - production
-      - monitoring
     <<: *logging
 
   redis-discord-analyzer-prod:
@@ -72,7 +69,6 @@ services:
         read_only: true
     networks:
       - production
-      - monitoring
     <<: *logging
 
   neo4j-prod:
@@ -96,7 +92,6 @@ services:
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
     networks:
       - production
-      - monitoring
     <<: *logging
 
   tc-server-comm-prod:
@@ -118,7 +113,6 @@ services:
       - rabbitmq-prod
     networks:
       - production
-      - monitoring
     <<: *logging
 
   tc-discord-bot-prod:
@@ -137,7 +131,6 @@ services:
       - rabbitmq-prod
     networks:
       - production
-      - monitoring
     <<: *logging
 
   tc-discord-analyzer-server-prod:
@@ -157,7 +150,6 @@ services:
       - rabbitmq-prod
     networks:
       - production
-      - monitoring
     <<: *logging
 
   tc-discord-analyzer-worker-prod:
@@ -178,84 +170,6 @@ services:
       - neo4j-prod
     networks:
       - production
-      - monitoring
-    <<: *logging
-
-  grafana:
-    image: grafana/grafana
-    container_name: grafana
-    restart: always
-    ports:
-      - 4000:3000
-    volumes:
-      - ./grafana/provisioning/:/etc/grafana/provisioning
-      - grafana_volume:/var/lib/grafana
-    networks:
-      - monitoring
-    <<: *logging
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_volume:/prometheus
-    depends_on:
-      - cadvisor
-    networks:
-      - monitoring
-    <<: *logging
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    depends_on:
-      - redis-cadvisor
-    networks:
-      - monitoring
-    <<: *logging
-
-  redis-cadvisor:
-    image: redis:latest
-    container_name: redis-cadvisor
-    networks:
-      - monitoring
-
-  loki:
-    container_name: loki
-    image: grafana/loki:2.8.0
-    restart: unless-stopped
-    volumes:
-      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
-      - loki_volume:/data/loki
-    command: -config.file=/etc/loki/loki-config.yaml
-    networks:
-      monitoring:
-        ipv4_address: 172.22.22.15
-    <<: *logging
-
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: node-exporter
-    restart: unless-stopped
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    networks:
-      - monitoring
     <<: *logging
 
 volumes:
@@ -272,8 +186,3 @@ volumes:
 networks:
   production:
     driver: bridge
-  monitoring:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.22.22.0/16
