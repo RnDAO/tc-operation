@@ -251,6 +251,20 @@ services:
     #   - 9100
     networks:
       - monitoring
+      
+  manual-triggers:
+    build:
+      context: ../../manual-triggers
+      dockerfile: Dockerfile
+      tags:
+        - manual-triggers:${VERSION:-latest}
+    env_file:
+      - ./.env.manual-triggers
+    depends_on:
+      - mongodb-dev
+      - rabbitmq-dev
+    networks:
+      - development
 
 volumes:
   mongodb_data_container:
