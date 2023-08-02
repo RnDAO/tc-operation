@@ -180,6 +180,22 @@ services:
       - monitoring
     <<: *logging
 
+  manual-triggers:
+    build:
+      context: ../../manual-triggers
+      dockerfile: Dockerfile
+      tags:
+        - manual-triggers:${VERSION:-latest}
+    env_file:
+      - ./.env.manual-triggers
+    depends_on:
+      - mongodb-prod
+      - rabbitmq-prod
+    networks:
+      - production
+      - monitoring
+    <<: *logging
+
 volumes:
   mongodb_data_container:
   rmq_data_container:
