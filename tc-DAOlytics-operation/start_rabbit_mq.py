@@ -39,7 +39,8 @@ def analyzer():
         password=redis_creds["pass"],
     )
 
-    rq_queue = RQ_Queue(connection=redis, default_timeout=1800)
+    ## 24 hours equal to 86400 seconds 
+    rq_queue = RQ_Queue(connection=redis, default_timeout=86400)
 
     analyzer_recompute = functools.partial(
         recompute_wrapper, redis_queue=rq_queue, rabbit_mq_creds=rabbit_mq_creds
