@@ -2,4 +2,4 @@ tc-messageBroker==1.4.0
 sentry-sdk
 rq
 redis
-git+https://${GITHUB_TOKEN}@github.com/RnDAO/tc-DAOlytics.git@v1.3.4#egg=rndao_analyzer&subdirectory=analyzer
+git+https://${GITHUB_TOKEN}@github.com/RnDAO/tc-DAOlytics.git@v1.3.5#egg=rndao_analyzer&subdirectory=analyzer
