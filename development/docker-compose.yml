@@ -119,8 +119,6 @@ services:
       - mongodb-dev
       - redis-discord-bot-dev
       - rabbitmq-dev
-    logging:
-      driver: json-file
     networks:
       - development
 
