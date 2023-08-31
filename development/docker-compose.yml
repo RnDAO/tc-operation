@@ -115,11 +115,12 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env.bot.proc
-    
     depends_on:
       - mongodb-dev
       - redis-discord-bot-dev
       - rabbitmq-dev
+    logging:
+      driver: json-file
     networks:
       - development
 
