@@ -24,3 +24,5 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`${HOST_NAME}`)"
       - "traefik.http.routers.whoami.entrypoints=web"
+    depends_on:
+      - traefik
