@@ -1,20 +1,36 @@
 version: "3.3"
 
+secrets:
+  cf_dns_api_token:
+    file: ./secrets/cf_dns_api_token.secret
+
 services:
 
   traefik:
     image: "traefik:v2.10"
     container_name: "traefik"
     command:
-      - "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.myresolver.acme.email=postmaster@togethercrew.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      # - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      # - "--log.level=DEBUG"
     ports:
       - "80:80"
+      - "443:443"
       - "8080:8080"
+    secrets:
+      - cf_dns_api_token
+    environment:
+      CF_DNS_API_TOKEN: /run/secrets/cf_dns_api_token
     volumes:
+      - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   whoami:
@@ -23,6 +39,5 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`${HOST_NAME}`)"
-      - "traefik.http.routers.whoami.entrypoints=web"
-    depends_on:
-      - traefik
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls.certresolver=myresolver"
