@@ -37,7 +37,7 @@ services:
       - traefik.http.routers.to-https.entrypoints=http
       - traefik.http.routers.to-https.middlewares=to-https
 
-      - traefik.http.routers.traefik.rule=Host(`${HOST_NAME}`) && Path(`/traefik`)
+      - traefik.http.routers.traefik.rule=(Host(`${HOST_NAME}`) && Path(`/traefik`))
       - traefik.http.routers.traefik.entrypoints=https
       - traefik.http.routers.traefik.middlewares=auth
       - traefik.http.routers.traefik.service=api@internal
