@@ -2,7 +2,7 @@ version: "3.3"
 
 secrets:
   cf_dns_api_token:
-    file: ./secrets/cf_dns_api_token.secret
+    file: "./secrets/cf_dns_api_token.secret"
 
 services:
 
@@ -26,9 +26,9 @@ services:
       - "443:443"
       - "8080:8080"
     secrets:
-      - cf_dns_api_token
+      - "cf_dns_api_token"
     environment:
-      CF_DNS_API_TOKEN: /run/secrets/cf_dns_api_token
+      - "CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_api_token"
     volumes:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
