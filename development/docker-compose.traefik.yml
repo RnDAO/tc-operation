@@ -32,6 +32,12 @@ services:
     volumes:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`${HOST_NAME}) && PathPrefix(`/traefik`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
+      # - "traefik.http.routers.dashboard.service=api@internal"
 
   whoami:
     image: "traefik/whoami"
