@@ -32,20 +32,10 @@ services:
     volumes:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    # labels:
-    #   # - "traefik.http.routers.to-https.rule=HostRegexp(`{host:.+}`)"
-    #   # - "traefik.http.routers.to-https.entrypoints=http"
-    #   # - "traefik.http.routers.to-https.middlewares=to-https"
-
-    #   - "traefik.http.routers.dashboard.rule=Host(`${HOST_NAME}`) && Path(`/traefik`)"
-    #   - "traefik.http.routers.dashboard.entrypoints=websecure"
-    #   - "traefik.http.routers.dashboard.middlewares=auth"
-    #   - "traefik.http.routers.dashboard.service=api@internal"
-    #   # - "traefik.http.routers.dashboard.tls=true"
-    #   - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-
-    #   - "traefik.http.middlewares.to-https.redirectscheme.scheme=https"
-    #   - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}"
+    labels:
+      - "traefik.http.routers.dashboard.rule=Host(`${HOST_NAME}`) && PathPrefix(`/traefik`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}"
 
   whoami:
     image: "traefik/whoami"
