@@ -20,10 +20,6 @@ services:
   whoami:
     image: "traefik/whoami"
     container_name: "simple-service"
-    env_file:
-      - ./.env.traefik
-    environment:
-      - HOST_NAME=${HOST_NAME}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`${HOST_NAME}`)"
