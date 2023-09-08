@@ -10,7 +10,7 @@ services:
     image: "traefik:v2.10"
     container_name: "traefik"
     command:
-      - "--api.insecure=true"
+      # - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -37,12 +37,12 @@ services:
       - "traefik.http.routers.to-https.entrypoints=http"
       - "traefik.http.routers.to-https.middlewares=to-https"
 
-      - "traefik.http.routers.traefik.rule=Host(`${HOST_NAME}`) && Path(`/traefik`)"
-      - "traefik.http.routers.traefik.entrypoints=https"
-      - "traefik.http.routers.traefik.middlewares=auth"
-      - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.routers.traefik.tls=true"
-      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.rule=Host(`${HOST_NAME}`) && Path(`/traefik`)"
+      - "traefik.http.routers.dashboard.entrypoints=https"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
 
       - "traefik.http.middlewares.to-https.redirectscheme.scheme=https"
       - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD}"
