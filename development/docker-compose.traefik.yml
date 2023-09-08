@@ -34,7 +34,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`${HOST_NAME}`) && Path(`/traefik`)"
+      - "traefik.http.routers.dashboard.rule=Host(`${HOST_NAME}`) && (PathPrefix(`/traefik`) && (PathPrefix(`/traefik/api`) || PathPrefix(`/traefik/dashboard`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
       # - "traefik.http.routers.dashboard.service=api@internal"
