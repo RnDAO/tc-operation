@@ -1,5 +1,9 @@
 version: "3.3"
 
+networks:
+  public:
+  private:
+
 secrets:
   cf_dns_api_token:
     file: "./secrets/cf_dns_api_token.secret"
@@ -32,12 +36,9 @@ services:
     volumes:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`${HOST_NAME}`) && (PathPrefix(`/traefik`) || PathPrefix(`/traefik/api`) || PathPrefix(`/traefik/dashboard`))"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
-      - "traefik.http.routers.dashboard.service=dashboard@internal"
+    networks:
+      - public
+      - private
 
   whoami:
     image: "traefik/whoami"
@@ -47,3 +48,5 @@ services:
       - "traefik.http.routers.whoami.rule=Host(`${HOST_NAME}`) && Path(`/whoami`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+    networks:
+      - private
