@@ -23,8 +23,8 @@ services:
       - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.myresolver.acme.email=postmaster@togethercrew.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--log.level=DEBUG"
+      # - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      # - "--log.level=DEBUG"
       - "--metrics.prometheus=true"
       - "--providers.docker.watch=true"
     ports:
@@ -53,8 +53,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.${HOST_NAME}`)"
-      # - "traefik.http.routers.whoami.entrypoints=websecure"
-      # - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls.certresolver=myresolver"
     networks:
       - private
 
@@ -73,6 +73,8 @@ services:
       - "traefik.http.routers.prometheus.service=prometheus"
       # - "traefik.http.routers.prometheus.middlewares=traefik-auth"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.tls.certresolver=myresolver"
     networks:
       - private
     restart: unless-stopped
