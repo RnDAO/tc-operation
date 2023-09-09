@@ -1,12 +1,8 @@
 version: "3.3"
 
-name: traefik
-
 networks:
   public:
   private:
-  monitoring_private:
-    external: true
 
 secrets:
   cf_dns_api_token:
@@ -27,10 +23,9 @@ services:
       - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.myresolver.acme.email=postmaster@togethercrew.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      # - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
       - "--log.level=DEBUG"
       - "--metrics.prometheus=true"
-      - "--metrics.prometheus.buckets=0.1,0.3,1.2,5.0"
       - "--providers.docker.watch=true"
     ports:
       - "80:80"
@@ -45,7 +40,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - public
-      - monitoring_private
+      - private
     logging:
       options:
         max-size: "10m"
@@ -57,8 +52,34 @@ services:
     container_name: "simple-service"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`${HOST_NAME}`) && Path(`/whoami`)"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.${HOST_NAME}`)"
+      # - "traefik.http.routers.whoami.entrypoints=websecure"
+      # - "traefik.http.routers.whoami.tls.certresolver=myresolver"
     networks:
       - private
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/:/etc/prometheus/:ro
+      - prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.size=256MB'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prom.${HOST_NAME}`)"
+      - "traefik.http.routers.prometheus.service=prometheus"
+      # - "traefik.http.routers.prometheus.middlewares=traefik-auth"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    networks:
+      - private
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  prometheus:

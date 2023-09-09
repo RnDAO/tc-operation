@@ -1,9 +1,8 @@
 version: '3'
 
-name: monitoring
-
 networks:
-  private:
+  development_private:
+    external: true
     # name: monitoring
     # ipam:
     #   config:
@@ -50,12 +49,12 @@ services:
     #   - cadvisor
     #   - node-exporter
     labels:
-      - "traefik.http.routers.prometheus.rule=Host(`${HOST_NAME}`) && PathPrefix(`/prom`)"
+      - "traefik.http.routers.prometheus.rule=Host(`prom.${HOST_NAME}`)"
       - "traefik.http.routers.prometheus.service=prometheus"
       # - "traefik.http.routers.prometheus.middlewares=traefik-auth"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     networks:
-      - private
+      - development_private
     restart: unless-stopped
     logging:
       options:
