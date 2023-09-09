@@ -1,10 +1,11 @@
 version: "3.3"
 
+name: traefik
+
 networks:
   public:
   private:
-  monitoring:
-    driver: bridge
+  monitoring_private:
     external: true
 
 secrets:
@@ -49,6 +50,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    restart: unless-stopped
 
   whoami:
     image: "traefik/whoami"

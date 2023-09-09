@@ -3,9 +3,8 @@ version: '3'
 name: monitoring
 
 networks:
-  monitoring:
+  private:
     # name: monitoring
-    # driver: bridge
     # ipam:
     #   config:
     #     - subnet: 172.22.22.0/16
@@ -56,7 +55,7 @@ services:
       # - "traefik.http.routers.prometheus.middlewares=traefik-auth"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     networks:
-      - monitoring
+      - private
     restart: unless-stopped
     logging:
       options:
