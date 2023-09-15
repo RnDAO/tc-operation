@@ -33,6 +33,8 @@ services:
     depends_on:
       - prometheus
       - loki
+    ports:
+      - 3000:3000
     networks:
       - monitoring
     <<: *logging
