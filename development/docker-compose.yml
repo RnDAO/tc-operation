@@ -24,6 +24,12 @@ services:
         source: ../init-mongo.sh
         target: /docker-entrypoint-initdb.d/init-mongo.sh
         read_only: true
+    healthcheck:
+      test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
     networks:
       - development
       - monitoring
@@ -39,6 +45,12 @@ services:
       - rmq_data_container:/var/lib/rabbitmq/
     env_file:
       - ./.env.rmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 2
+      start_period: 40s
     networks:
       - development
       - monitoring
@@ -55,6 +67,12 @@ services:
         source: ./redis/discordBot.conf
         target: /usr/local/etc/redis/redis.conf
         read_only: true
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
     networks:
       - development
       - monitoring
@@ -71,6 +89,12 @@ services:
         source: ./redis/discordAnalyzer.conf
         target: /usr/local/etc/redis/redis.conf
         read_only: true
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
     networks:
       - development
       - monitoring
