@@ -48,11 +48,6 @@ services:
     depends_on:
       - cadvisor
       - node-exporter
-    labels:
-      - "traefik.http.routers.prometheus.rule=Host(`prom.${HOST_NAME}`)"
-      - "traefik.http.routers.prometheus.service=prometheus"
-      # - "traefik.http.routers.prometheus.middlewares=traefik-auth"
-      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     networks:
       - monitoring
     restart: unless-stopped
