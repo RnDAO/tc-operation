@@ -146,7 +146,7 @@ services:
 
   tc-discord-analyzer-server-dev:
     build:
-      context: ../tc-DAOlytics-operation
+      context: ../../discord-analyzer
       target: prod-server
       dockerfile: Dockerfile
       args:
@@ -167,7 +167,7 @@ services:
 
   tc-discord-analyzer-worker-dev:
     build:
-      context: ../tc-DAOlytics-operation
+      context: ../../discord-analyzer
       target: prod-worker
       dockerfile: Dockerfile
       args:
