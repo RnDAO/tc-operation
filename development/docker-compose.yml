@@ -97,6 +97,12 @@ services:
       - NEO4J_server.memory.heap.max_size=4G
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+    healthcheck:
+      test: ["CMD" ,"wget", "http://neo4j-dev:7474"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
     networks:
       - development
       - monitoring
