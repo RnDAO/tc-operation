@@ -225,6 +225,50 @@ services:
       - monitoring
     <<: *logging
 
+  redis-twitter-bot:
+    image: redis:7.0.11
+    restart: unless-stopped
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    ports:
+      - 8379:6379
+    volumes:
+      - type: bind
+        source: ./redis/twitter.conf
+        target: /usr/local/etc/redis/redis.conf
+        read_only: true
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+    networks:
+      - development
+      - monitoring
+    <<: *logging
+
+  twitter-bot-server:
+    build: 
+      context: ghcr.io/giuliomat/TogetherCrew/twitter-bot
+      target: prod-server
+    restart: unless-stopped
+    env_file:
+      - ./.env.twitter
+    depends_on:
+      mongodb-dev:
+        condition: service_healthy
+      neo4j-dev:
+        condition: service_healthy
+      rabbitmq-dev: 
+        condition: service_healthy
+      redis-twitter-bot:
+        condition: service_healthy
+    networks:
+      - development
+      - monitoring
+    <<: *logging
+    
+
 volumes:
   mongodb_data_container:
   rmq_data_container:
