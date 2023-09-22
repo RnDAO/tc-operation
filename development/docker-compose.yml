@@ -248,9 +248,28 @@ services:
     <<: *logging
 
   twitter-bot-server:
-    build: 
-      context: ghcr.io/giuliomat/TogetherCrew/twitter-bot
-      target: prod-server
+    image: ghcr.io/giuliomat/TogetherCrew/twitter-bot
+    command: python3 server.py
+    restart: unless-stopped
+    env_file:
+      - ./.env.twitter
+    depends_on:
+      mongodb-dev:
+        condition: service_healthy
+      neo4j-dev:
+        condition: service_healthy
+      rabbitmq-dev: 
+        condition: service_healthy
+      redis-twitter-bot:
+        condition: service_healthy
+    networks:
+      - development
+      - monitoring
+    <<: *logging
+
+  twitter-bot-worker:
+    image: ghcr.io/giuliomat/TogetherCrew/twitter-bot
+    command: python3 worker.py
     restart: unless-stopped
     env_file:
       - ./.env.twitter
