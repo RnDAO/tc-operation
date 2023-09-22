@@ -248,7 +248,7 @@ services:
     <<: *logging
 
   twitter-bot-server:
-    image: ghcr.io/giuliomat/TogetherCrew/twitter-bot
+    image: ghcr.io/TogetherCrew/twitter-bot
     command: python3 server.py
     restart: unless-stopped
     env_file:
@@ -268,7 +268,7 @@ services:
     <<: *logging
 
   twitter-bot-worker:
-    image: ghcr.io/giuliomat/TogetherCrew/twitter-bot
+    image: ghcr.io/TogetherCrew/twitter-bot
     command: python3 worker.py
     restart: unless-stopped
     env_file:
