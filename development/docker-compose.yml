@@ -173,15 +173,9 @@ services:
       - monitoring
     <<: *logging
 
-  tc-discord-analyzer-server-dev:
-    build:
-      context: ../../discord-analyzer
-      target: prod-server
-      dockerfile: Dockerfile
-      args:
-        - GITHUB_TOKEN=${GITHUB_TOKEN}
-      tags:
-        - tc-discord-analyzer:${VERSION:-latest}
+  discord-analyzer-server:
+    image: ghcr.io/togethercrew/discord-analyzer:pr-18
+    command: python3 server.py
     restart: unless-stopped
     env_file:
       - ./.env.analyzer.proc
@@ -195,15 +189,9 @@ services:
       - monitoring
     <<: *logging
 
-  tc-discord-analyzer-worker-dev:
-    build:
-      context: ../../discord-analyzer
-      target: prod-worker
-      dockerfile: Dockerfile
-      args:
-        - GITHUB_TOKEN=${GITHUB_TOKEN}
-      tags:
-        - tc-discord-analyzer:${VERSION:-latest}
+  discord-analyzer-worker:
+    image: ghcr.io/togethercrew/discord-analyzer:pr-18
+    command: python3 worker.py
     restart: unless-stopped
     env_file:
       - ./.env.analyzer.proc
