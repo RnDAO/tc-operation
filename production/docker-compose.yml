@@ -82,8 +82,7 @@ services:
     networks:
       - production
       - monitoring
-    <<: *logging
-    <<: *rabbitmq-healthcheck
+    <<: [*logging, *rabbitmq-healthcheck]
 
   redis-discord-bot-prod:
     image: redis:7.0.11
@@ -97,8 +96,7 @@ services:
     networks:
       - production
       - monitoring
-    <<: *logging
-    <<: *redis-healthcheck
+    <<: [*logging, *redis-healthcheck]
 
   redis-discord-analyzer-prod:
     image: redis:7.0.11
@@ -112,8 +110,7 @@ services:
     networks:
       - production
       - monitoring
-    <<: *logging
-    <<: *redis-healthcheck
+    <<: [*logging, *redis-healthcheck]
 
   neo4j-prod:
     image: neo4j:5.9.0
@@ -137,8 +134,7 @@ services:
     networks:
       - production
       - monitoring
-    <<: *logging
-    <<: *neo4j-healthcheck
+    <<: [*logging, *neo4j-healthcheck]
 
   tc-server-comm-prod:
     build:
