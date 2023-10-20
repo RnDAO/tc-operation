@@ -140,41 +140,35 @@ services:
       - monitoring
     <<: *logging
 
-  tc-discord-analyzer-server-prod:
-    build:
-      context: ../tc-DAOlytics-operation
-      target: prod-server
-      dockerfile: Dockerfile
-      args:
-        - GITHUB_TOKEN=${GITHUB_TOKEN}
-      tags:
-        - tc-discord-analyzer:${VERSION:-latest}
+  discord-analyzer-server:
+    image: ghcr.io/togethercrew/discord-analyzer:main
+    command: python3 server.py
     restart: unless-stopped
     env_file:
       - ./.env.analyzer.proc
     depends_on:
-      - redis-discord-analyzer-prod
-      - rabbitmq-prod
+      redis-discord-analyzer-prod:
+        condition: service_healthy
+      rabbitmq-prod:
+        condition: service_healthy
     networks:
       - production
+      - monitoring
     <<: *logging
 
-  tc-discord-analyzer-worker-prod:
-    build:
-      context: ../tc-DAOlytics-operation
-      target: prod-worker
-      dockerfile: Dockerfile
-      args:
-        - GITHUB_TOKEN=${GITHUB_TOKEN}
-      tags:
-        - tc-discord-analyzer:${VERSION:-latest}
+  discord-analyzer-worker:
+    image: ghcr.io/togethercrew/discord-analyzer:main
+    command: python3 worker.py
     restart: unless-stopped
     env_file:
       - ./.env.analyzer.proc
     depends_on:
-      - mongodb-prod
-      - redis-discord-analyzer-prod
-      - neo4j-prod
+      mongodb-prod:
+        condition: service_healthy
+      redis-discord-analyzer-prod:
+        condition: service_healthy
+      neo4j-prod:
+        condition: service_healthy
     networks:
       - production
       - monitoring
