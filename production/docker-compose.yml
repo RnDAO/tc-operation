@@ -150,7 +150,7 @@ services:
     env_file:
       - ./.env.proc
     depends_on:
-      mongodb-p:
+      mongodb-prod:
         condition: service_healthy
       neo4j-prod:
         condition: service_healthy
