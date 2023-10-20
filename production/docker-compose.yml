@@ -150,11 +150,11 @@ services:
     env_file:
       - ./.env.proc
     depends_on:
-      mongodb-dev:
+      mongodb-p:
         condition: service_healthy
-      neo4j-dev:
+      neo4j-prod:
         condition: service_healthy
-      rabbitmq-dev:
+      rabbitmq-prod:
         condition: service_healthy
     networks:
       - production
@@ -172,11 +172,11 @@ services:
     env_file:
       - ./.env.bot.proc
     depends_on:
-      mongodb-dev:
+      mongodb-prod:
         condition: service_healthy
-      redis-discord-bot-dev:
+      redis-discord-bot-prod:
         condition: service_healthy
-      rabbitmq-dev:
+      rabbitmq-prod:
         condition: service_healthy
     networks:
       - production
