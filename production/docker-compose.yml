@@ -9,6 +9,42 @@ x-logging:
       loki-retries: 5
       loki-batch-size: 400
 
+x-redis-healthcheck:
+  &redis-healthcheck
+  healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+
+x-rabbitmq-healthcheck:
+  &rabbitmq-healthcheck
+  healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 2
+      start_period: 40s
+
+x-mongodb-healthcheck:
+  &mongodb-healthcheck
+  healthcheck:
+      test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+
+x-neo4j-healthcheck:
+  &neo4j-healthcheck
+  healthcheck:
+    test: ["CMD" ,"wget", "http://localhost:7474"]
+    interval: 1m30s
+    timeout: 10s
+    retries: 2
+    start_period: 40s
+
 services:
   mongodb-prod:
     image: mongo:latest
@@ -32,6 +68,7 @@ services:
     networks:
       - production
       - monitoring
+    <<: *mongodb-healthcheck
 
   rabbitmq-prod:
     image: rabbitmq:3-management
@@ -42,16 +79,11 @@ services:
         - rmq_data_container:/var/lib/rabbitmq/
     env_file:
       - ./.env.rmq
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 2
-      start_period: 40s
     networks:
       - production
       - monitoring
     <<: *logging
+    <<: *rabbitmq-healthcheck
 
   redis-discord-bot-prod:
     image: redis:7.0.11
@@ -66,6 +98,7 @@ services:
       - production
       - monitoring
     <<: *logging
+    <<: *redis-healthcheck
 
   redis-discord-analyzer-prod:
     image: redis:7.0.11
@@ -76,16 +109,11 @@ services:
         source: ./redis/discordAnalyzer.conf
         target: /usr/local/etc/redis/redis.conf
         read_only: true
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 60s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
     networks:
       - production
       - monitoring
     <<: *logging
+    <<: *redis-healthcheck
 
   neo4j-prod:
     image: neo4j:5.9.0
@@ -110,6 +138,7 @@ services:
       - production
       - monitoring
     <<: *logging
+    <<: *neo4j-healthcheck
 
   tc-server-comm-prod:
     build:
@@ -125,9 +154,12 @@ services:
     env_file:
       - ./.env.proc
     depends_on:
-      - mongodb-prod
-      - neo4j-prod
-      - rabbitmq-prod
+      mongodb-dev:
+        condition: service_healthy
+      neo4j-dev:
+        condition: service_healthy
+      rabbitmq-dev:
+        condition: service_healthy
     networks:
       - production
       - monitoring
@@ -144,9 +176,12 @@ services:
     env_file:
       - ./.env.bot.proc
     depends_on:
-      - mongodb-prod
-      - redis-discord-bot-prod
-      - rabbitmq-prod
+      mongodb-dev:
+        condition: service_healthy
+      redis-discord-bot-dev:
+        condition: service_healthy
+      rabbitmq-dev:
+        condition: service_healthy
     networks:
       - production
       - monitoring
