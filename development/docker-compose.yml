@@ -287,6 +287,8 @@ services:
       - development
       - monitoring
     <<: *logging
+    ports:
+      - 41234:1234
 
   hivemind-vector-worker:
     image: ghcr.io/kamikazebr/qabot:main-vector_server
@@ -338,6 +340,8 @@ services:
       - development
       - monitoring
     <<: *logging
+    ports:
+      - 43333:3333
   
   # HIVEMIND SERVICES - END
 
