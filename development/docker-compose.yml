@@ -268,7 +268,77 @@ services:
       - development
       - monitoring
     <<: *logging
-    
+
+  # HIVEMIND SERVICES - START
+
+  hivemind-vector-server:
+    image: ghcr.io/kamikazebr/qabot:main-vector_server
+    depends_on:
+      rabbitmq-dev: 
+        condition: service_healthy
+      hivemind-vector-redis:
+        condition: service_healthy
+      hivemind-vector-worker:
+        condition: service_healthy
+    env_file:
+      - .env.hivemind.vector.server
+    networks:
+      - hivemind
+      - development
+      - monitoring
+    <<: *logging
+
+  hivemind-vector-worker:
+    image: ghcr.io/kamikazebr/qabot:main-vector_server
+    env_file:
+      - .env.hivemind.vector.worker
+    depends_on:
+      hivemind-vector-redis:
+        condition: service_healthy
+    command: celery -A tasks.celery worker -c 1 --hostname celery --loglevel=info
+    healthcheck:
+      test: ["CMD", "celery", "inspect", "ping", "-A", "tasks.add", "-d" "celery@celery"]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 10s
+    networks:
+      - hivemind
+      - monitoring
+    <<: *logging
+
+  hivemind-vector-redis:
+    image: redis:7.0.11
+    restart: unless-stopped
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    volumes:
+      - type: bind
+        source: ./redis/hivemind.vector.conf
+        target: /usr/local/etc/redis/redis.conf
+        read_only: true
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+    networks:
+      - hivemind
+      - monitoring
+    <<: *logging
+
+  hivemind-api:
+    image: ghcr.io/kamikazebr/qabot:main-ml
+    env_file:
+      - .env.hivemind.api
+    networks:
+      - hivemind
+      - development
+      - monitoring
+    <<: *logging
+  
+  # HIVEMIND SERVICES - END
+
 
 volumes:
   mongodb_data_container:
