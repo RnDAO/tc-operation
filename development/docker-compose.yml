@@ -299,7 +299,7 @@ services:
     volumes:
       - hivemind_vector_store:/project/vector_store
     healthcheck:
-      test: ["CMD", "celery", "inspect", "ping", "-d", "celery@$$HOSTNAME"]
+      test: ["CMD", "celery", "inspect", "ping", "-d", "celery@celery"]
       interval: 60s
       timeout: 10s
       retries: 2
