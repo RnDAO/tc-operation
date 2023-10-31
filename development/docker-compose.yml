@@ -297,7 +297,7 @@ services:
         condition: service_healthy
     command: celery -A tasks.celery worker -c 1 --hostname celery --loglevel=info
     healthcheck:
-      test: ["CMD", "celery", "inspect", "ping", "-A", "tasks.add", "-d" "celery@celery"]
+      test: ["CMD", "celery", "inspect", "ping", "-A", "tasks.add", "-d", "celery@celery"]
       interval: 60s
       timeout: 10s
       retries: 2
