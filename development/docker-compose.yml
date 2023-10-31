@@ -296,6 +296,8 @@ services:
       hivemind-vector-redis:
         condition: service_healthy
     command: celery -A tasks.celery worker -c 1 --hostname celery --loglevel=info
+    volumes:
+      - hivemind_vector_store::/project/vector_store
     healthcheck:
       test: ["CMD", "celery", "inspect", "ping", "-A", "tasks.add", "-d", "celery@celery"]
       interval: 60s
@@ -350,6 +352,7 @@ volumes:
   neo4j_data:
   neo4j_import:
   neo4j_plugins:
+  hivemind_vector_store:
 
 networks:
   development:
