@@ -299,7 +299,7 @@ services:
     volumes:
       - hivemind_vector_store:/project/vector_store
     healthcheck:
-      test: ["CMD-SHELL", "celery inspect ping --destination celery@$$HOSTNAME"]
+      test: ["CMD-SHELL", "celery -A tasks.celery inspect ping"]
       interval: 10s
       timeout: 10s
       retries: 2
