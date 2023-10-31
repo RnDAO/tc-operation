@@ -295,7 +295,7 @@ services:
     depends_on:
       hivemind-vector-redis:
         condition: service_healthy
-    command: celery -A tasks.celery worker -c 1 --hostname celery --loglevel=info
+    command: celery -A tasks.celery worker -c 1 --hostname hivemind-vector-worker --loglevel=info
     volumes:
       - hivemind_vector_store:/project/vector_store
     healthcheck:
