@@ -357,3 +357,5 @@ networks:
   monitoring:
     driver: bridge
     external: true
+  hivemind:
+    driver: bridge
