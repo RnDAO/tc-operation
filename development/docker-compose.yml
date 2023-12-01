@@ -344,6 +344,46 @@ services:
   
   # HIVEMIND SERVICES - END
 
+  # DISCOURSE SERVICES - START
+
+  discourse-redis:
+    image: redis:7.0.11
+    restart: unless-stopped
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    volumes:
+      - type: bind
+        source: ./redis/discourse.conf
+        target: /usr/local/etc/redis/redis.conf
+        read_only: true
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+    networks:
+      - hivemind
+      - monitoring
+    <<: *logging
+
+  discourse:
+    image: 
+    command: yarn run start:prod
+    restart: always
+    ports:
+      - 43001:3000
+    env_file:
+      - .env.discourse
+    depends_on:
+      discourse-redis:
+        condition: service_healthy
+      rabbitmq-dev:
+        condition: service_healthy
+      neo4j-dev:
+        condition: service_healthy
+
+  # DISCOURSE SERVICES - END
+
 volumes:
   mongodb_data_container:
   rmq_data_container:
