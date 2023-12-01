@@ -367,7 +367,7 @@ services:
     <<: *logging
 
   discourse:
-    image: 
+    image: ghcr.io/togethercrew/discourse:main
     command: yarn run start:prod
     restart: always
     ports:
