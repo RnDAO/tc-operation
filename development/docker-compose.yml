@@ -270,7 +270,6 @@ services:
     <<: *logging
 
   # HIVEMIND SERVICES - START
-
   hivemind-vector-server:
     image: ghcr.io/kamikazebr/qabot:main-vector_server
     depends_on:
@@ -344,7 +343,6 @@ services:
       - 43333:3333
   
   # HIVEMIND SERVICES - END
-
 
 volumes:
   mongodb_data_container:
