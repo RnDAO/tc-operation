@@ -269,6 +269,7 @@ services:
       - monitoring
     <<: *logging
 
+  # HIVEMIND SERVICES - START
   hivemind-vector-server:
     image: ghcr.io/kamikazebr/qabot:main-vector_server
     depends_on:
@@ -279,22 +280,28 @@ services:
       hivemind-vector-worker:
         condition: service_healthy
     env_file:
-      - .hivemind.vector-server.env
+      - .env.hivemind.vector.server
     networks:
       - hivemind
+      - development
       - monitoring
     <<: *logging
+    ports:
+      - 41234:1234
+
   hivemind-vector-worker:
     image: ghcr.io/kamikazebr/qabot:main-vector_server
     env_file:
-      - .hivemind.vector-worker.env
+      - .env.hivemind.vector.worker
     depends_on:
       hivemind-vector-redis:
         condition: service_healthy
-    command: celery -A tasks.celery worker -c 1 --hostname celery --loglevel=info
+    command: celery -A tasks.celery worker -c 1 --hostname hivemind-vector-worker --loglevel=info
+    volumes:
+      - hivemind_vector_store:/project/vector_store
     healthcheck:
-      test: ["CMD", "celery", "inspect", "ping", "-A", "tasks.add", "-d" "celery@celery"]
-      interval: 60s
+      test: ["CMD-SHELL", "celery -A tasks.celery inspect ping"]
+      interval: 10s
       timeout: 10s
       retries: 2
       start_period: 10s
@@ -302,6 +309,7 @@ services:
       - hivemind
       - monitoring
     <<: *logging
+
   hivemind-vector-redis:
     image: redis:7.0.11
     restart: unless-stopped
@@ -321,17 +329,20 @@ services:
       - hivemind
       - monitoring
     <<: *logging
+
   hivemind-api:
     image: ghcr.io/kamikazebr/qabot:main-ml
     env_file:
-      - .hivemind.api.env
+      - .env.hivemind.api
     networks:
       - hivemind
       - development
       - monitoring
     <<: *logging
+    ports:
+      - 43333:3333
   
-
+  # HIVEMIND SERVICES - END
 
 volumes:
   mongodb_data_container:
@@ -343,6 +354,7 @@ volumes:
   neo4j_data:
   neo4j_import:
   neo4j_plugins:
+  hivemind_vector_store:
 
 networks:
   development:
@@ -350,3 +362,5 @@ networks:
   monitoring:
     driver: bridge
     external: true
+  hivemind:
+    driver: bridge
