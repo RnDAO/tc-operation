@@ -362,7 +362,7 @@ services:
       retries: 2
       start_period: 40s
     networks:
-      - hivemind
+      - discourse
       - monitoring
     <<: *logging
 
@@ -381,6 +381,11 @@ services:
         condition: service_healthy
       neo4j-dev:
         condition: service_healthy
+    networks:
+      - discourse
+      - development
+      - monitoring
+    <<: *logging
 
   # DISCOURSE SERVICES - END
 
@@ -403,4 +408,6 @@ networks:
     driver: bridge
     external: true
   hivemind:
+    driver: bridge
+  discourse:
     driver: bridge
