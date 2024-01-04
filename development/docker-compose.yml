@@ -14,14 +14,13 @@ services:
     image: mongo:latest
     container_name: mongodb-dev
     restart: unless-stopped
-    command: mongod --replSet rs0 --bind_ip_all --auth --keyFile /data/keyfile/mongodb-keyfile
+    command: mongo --replSet "rs0"
     ports:
       - 37017:27017
     env_file:
       - ./.env.db
     volumes:
       - mongodb_data_container:/data/db
-      - /mongodb-keyfile:/data/keyfile
       - type: bind
         source: ../init-mongo.sh
         target: /docker-entrypoint-initdb.d/init-mongo.sh
