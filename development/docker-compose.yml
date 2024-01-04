@@ -26,6 +26,12 @@ services:
         source: ../init-mongo.sh
         target: /docker-entrypoint-initdb.d/init-mongo.sh
         read_only: true
+    entrypoint:
+      - bash
+      - -c
+      - |
+          chmod 400 /etc/mongo/replica.key
+          chown 999:999 /etc/mongo/replica.key
     healthcheck:
       # test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
       test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb-dev'}]}) }" | mongosh --port 27017 --quiet
