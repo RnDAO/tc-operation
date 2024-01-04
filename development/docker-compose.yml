@@ -14,12 +14,13 @@ services:
     image: mongo:latest
     container_name: mongodb-dev
     restart: unless-stopped
-    command: mongod --replSet "rs0"
+    command: mongod --bind_ip_all --replSet dbrs --keyFile /data/replica.key
     ports:
       - 37017:27017
     env_file:
       - ./.env.db
     volumes:
+      - mongo/replica.key:/data/replica.key
       - mongodb_data_container:/data/db
       - type: bind
         source: ../init-mongo.sh
