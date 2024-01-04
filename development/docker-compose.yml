@@ -21,7 +21,7 @@ services:
     env_file:
       - ./.env.db
     volumes:
-      - /mongo:/etc/mongo
+      - ./mongo:/etc/mongo
       - mongodb_data_container:/data/db
       - type: bind
         source: ../init-mongo.sh
