@@ -14,7 +14,7 @@ services:
     image: mongo:latest
     container_name: mongodb-dev
     restart: unless-stopped
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017", "--keyFile", "/etc/mongo/replica.key"]
+    # command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017", "--keyFile", "/etc/mongo/replica.key"]
     ports:
       - 37017:27017
     env_file:
@@ -33,8 +33,8 @@ services:
     #       chmod 400 /etc/mongo/replica.key
     #       chown 999:999 /etc/mongo/replica.key
     healthcheck:
-      # test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
-      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb-dev'}]}) }" | mongosh --port 27017 --quiet
+      test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+      # test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb-dev'}]}) }" | mongosh --port 27017 --quiet
       interval: 60s
       timeout: 10s
       retries: 2
