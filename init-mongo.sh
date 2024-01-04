@@ -11,18 +11,18 @@ mongosh -- "$MONGO_INITDB_DATABASE" <<EOF
     db.createUser({user: rootUser, pwd: rootPassword, roles: ["readWrite"]});
 
     # REPLICA SET
-    # var config = {
-    #     "_id": "dbrs",
-    #     "version": 1,
-    #     "members": [
-    #         {
-    #             "_id": 1,
-    #             "host": "mongodb-dev:27017",
-    #             "priority": 1
-    #         },
-    #     ]
-    # };
+    var config = {
+        "_id": "rs0",
+        "version": 1,
+        "members": [
+            {
+                "_id": 1,
+                "host": "mongodb-dev:27017",
+                "priority": 1
+            },
+        ]
+    };
 
-    # rs.initiate(config, { force: true })
-    # rs.status()
+    rs.initiate(config, { force: true })
+    rs.status()
 EOF
