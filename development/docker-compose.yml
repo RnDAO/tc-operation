@@ -14,7 +14,7 @@ services:
     image: mongo:latest
     container_name: mongodb-dev
     restart: unless-stopped
-    command: ["--replSet", "rs0", "--bind_ip_all"]
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     ports:
       - 37017:27017
     env_file:
