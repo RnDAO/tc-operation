@@ -15,7 +15,7 @@ services:
     container_name: mongodb-dev
     restart: unless-stopped
     # command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017", "--keyFile", "/etc/mongo/replica.key"]
-    command: ["--replSet", "rs0"]
+    command: ["--replSet", "rs0", "--keyFile", "/etc/mongo/replica.key"]
     ports:
       - 37017:27017
     env_file:
