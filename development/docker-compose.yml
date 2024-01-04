@@ -21,7 +21,7 @@ services:
       - ./.env.db
     volumes:
       - mongodb_data_container:/data/db
-      - mongodb-keyfile:/data/keyfile
+      - /mongodb-keyfile:/data/keyfile
       - type: bind
         source: ../init-mongo.sh
         target: /docker-entrypoint-initdb.d/init-mongo.sh
