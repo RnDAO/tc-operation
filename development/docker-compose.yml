@@ -12,29 +12,18 @@ x-logging:
 services:
   mongodb-dev:
     image: mongo:latest
-    container_name: mongodb-dev
     restart: unless-stopped
-    command: ["--replSet", "rs0", "--keyFile", "/etc/mongo/replica.key", "--bind_ip_all"]
+    command: ['--replSet', 'rs0']
     ports:
       - 37017:27017
     env_file:
       - ./.env.db
     volumes:
-      - ./mongo:/etc/mongo
+      - ./mongo:/etc/mongo:ro
       - mongodb_data_container:/data/db
-      - type: bind
-        source: ../init-mongo.sh
-        target: /docker-entrypoint-initdb.d/init-mongo.sh
-        read_only: true
-    # entrypoint:
-    #   - bash
-    #   - -c
-    #   - |
-    #       chmod 400 /etc/mongo/replica.key
-    #       chown 999:999 /etc/mongo/replica.key
+      - ../init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
     healthcheck:
-      # test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
-      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost'}]}) }" | mongosh localhost:27017/test --quiet
+      test: test $(echo $(mongosh --quiet /etc/mongo/healthcheck.js)) -eq 1
       interval: 60s
       timeout: 10s
       retries: 2
