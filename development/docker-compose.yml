@@ -149,6 +149,26 @@ services:
       - monitoring
     <<: *logging
 
+  redis-api:
+    image: redis:7.0.11
+    restart: unless-stopped
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    volumes:
+      - type: bind
+        source: ./redis/api.conf
+        target: /usr/local/etc/redis/redis.conf
+        read_only: true
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+    networks:
+      - development
+      - monitoring
+    <<: *logging
+
   tc-discord-bot-dev:
     build:
       context: ../../tc-discordBot
