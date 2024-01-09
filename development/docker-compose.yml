@@ -144,6 +144,8 @@ services:
         condition: service_healthy
       rabbitmq-dev:
         condition: service_healthy
+      redis-api:
+        condition: service_healthy
     networks:
       - development
       - monitoring
