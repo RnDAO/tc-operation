@@ -354,6 +354,9 @@ services:
     image: ghcr.io/kamikazebr/qabot:main-ml
     env_file:
       - .env.hivemind.api
+    depends_on:
+      rabbitmq-dev: 
+        condition: service_healthy
     networks:
       - hivemind
       - development
