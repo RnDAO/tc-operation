@@ -19,9 +19,9 @@ services:
     env_file:
       - ./.env.db
     volumes:
+      - ../init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
       - ./mongo:/etc/mongo:ro
       - mongodb_data_container:/data/db
-      - ../init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
     healthcheck:
       test: test $(echo $(mongosh --quiet /etc/mongo/healthcheck.js)) -eq 1
       interval: 60s
