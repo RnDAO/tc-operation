@@ -194,7 +194,7 @@ services:
     <<: *logging
 
   discord-analyzer-server:
-    image: ghcr.io/togethercrew/discord-analyzer:pr-58
+    image: ghcr.io/togethercrew/discord-analyzer:pr-60
     command: python3 server.py
     restart: unless-stopped
     env_file:
@@ -210,7 +210,7 @@ services:
     <<: *logging
 
   discord-analyzer-worker:
-    image: ghcr.io/togethercrew/discord-analyzer:pr-58
+    image: ghcr.io/togethercrew/discord-analyzer:pr-60
     command: python3 worker.py
     restart: unless-stopped
     env_file:
