@@ -529,7 +529,7 @@ services:
       pgvector:
         condition: service_healthy
     networks:
-      - discourse
+      - development
       - monitoring
     <<: *logging
 
