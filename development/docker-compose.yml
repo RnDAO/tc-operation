@@ -518,6 +518,7 @@ services:
 
   hivemind-bot:
     image: ghcr.io/togethercrew/hivemind-bot:main
+    restart: unless-stopped
     env_file:
       - ./.env.hivemind-bot
     depends_on:
