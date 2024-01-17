@@ -480,7 +480,6 @@ services:
     user: "0:0"
     volumes:
       - airflow_sources:/sources
-      - ./airflow/init.sh:/init.sh:ro
 
   airflow-cli:
     <<: *airflow-common
