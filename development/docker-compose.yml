@@ -523,7 +523,7 @@ services:
     depends_on:
       neo4j-dev:
         condition: service_healthy
-      mongo-dev:
+      mongodb-dev:
         condition: service_healthy
       pgvector:
         condition: service_healthy
