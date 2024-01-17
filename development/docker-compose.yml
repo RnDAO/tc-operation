@@ -9,6 +9,27 @@ x-logging:
       loki-retries: 5
       loki-batch-size: 400
 
+x-airflow-common:
+  &airflow-common
+  image: ghcr.io/togethercrew/airflow-dags:main
+  env_file:
+    &airflow-common-env
+    - ./.env.airflow
+  volumes:
+    - ./dags:/opt/airflow/dags:ro
+    - airflow_logs:/opt/airflow/logs
+    - airflow_config:/opt/airflow/config
+    - airflow_plugins:/opt/airflow/plugins
+  user: "50000:0"
+  depends_on:
+    &airflow-common-depends-on
+    airflow-redis:
+      condition: service_healthy
+    postgres:
+      condition: service_healthy
+    neo4j-dev:
+      condition: service_healthy
+
 services:
   mongodb-dev:
     image: mongo:7
@@ -412,6 +433,12 @@ services:
 
   # DISCOURSE SERVICES - END
 
+  # AIRFLOW SERVICES - START
+
+
+
+  # AIRFLOW SERVICES - END
+
 volumes:
   mongodb_data_container:
   rmq_data_container:
@@ -423,6 +450,11 @@ volumes:
   neo4j_import:
   neo4j_plugins:
   hivemind_vector_store:
+  postgres_data:
+  airflow_config:
+  airflow_logs:
+  airflow_plugins:
+  airflow_sources:
 
 networks:
   development:
