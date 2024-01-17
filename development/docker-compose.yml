@@ -96,6 +96,7 @@ services:
       - 25672:15672
     volumes:
       - rmq_data_container:/var/lib/rabbitmq/
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
     env_file:
       - ./.env.rmq
     healthcheck:
