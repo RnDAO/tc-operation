@@ -516,6 +516,18 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+  hivemind-bot:
+    image: ghcr.io/togethercrew/hivemind-bot:main
+    env_file:
+      - ./.env.hivemind-bot
+    depends_on:
+      neo4j-dev:
+        condition: service_healthy
+      mongo-dev:
+        condition: service_healthy
+      pgvector:
+        condition: service_healthy
+
   # AIRFLOW SERVICES - END
 
 volumes:
