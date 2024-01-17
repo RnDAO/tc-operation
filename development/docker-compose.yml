@@ -25,7 +25,7 @@ x-airflow-common:
     &airflow-common-depends-on
     airflow-redis:
       condition: service_healthy
-    postgres:
+    pgvector:
       condition: service_healthy
     neo4j-dev:
       condition: service_healthy
@@ -144,6 +144,21 @@ services:
       - development
       - monitoring
     <<: *logging
+
+  pgvector:
+    image: ankane/pgvector
+    ports:
+      - 5432:5432
+    env_file:
+      ./.env.pgvector
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
 
   api:
     build:
@@ -450,7 +465,7 @@ volumes:
   neo4j_import:
   neo4j_plugins:
   hivemind_vector_store:
-  postgres_data:
+  pgvector_data:
   airflow_config:
   airflow_logs:
   airflow_plugins:
