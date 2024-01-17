@@ -32,6 +32,7 @@ x-airflow-common:
   networks:
     - development
     - monitoring
+  <<: *logging
 
 x-redis-common:
   &redis-common
@@ -44,6 +45,7 @@ x-redis-common:
     timeout: 10s
     retries: 2
     start_period: 40s
+  <<: *logging
 
 services:
   mongodb-dev:
@@ -472,7 +474,6 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
 
   airflow-webserver:
     <<: *airflow-common
