@@ -172,7 +172,6 @@ services:
       - pgvector_data:/var/lib/postgresql/data
     healthcheck:
       test: "pg_isready -U ${POSTGRES_USER}"
-      # test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
       retries: 5
       start_period: 5s
