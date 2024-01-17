@@ -477,7 +477,7 @@ services:
   airflow-init:
     <<: *airflow-common
     entrypoint: /bin/bash
-    command: /init.sh
+    command: -c "./init.sh"
     env_file:
       - ./.env.airflow
       - ./.env.airflow.init
