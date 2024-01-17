@@ -46,6 +46,24 @@ x-redis-common:
     start_period: 40s
   <<: *logging
 
+x-hivemind-common:
+  &hivemind-common
+  image: ghcr.io/togethercrew/hivemind-bot:main
+  restart: unless-stopped
+  env_file:
+    - ./.env.hivemind-bot
+  depends_on:
+    neo4j-dev:
+      condition: service_healthy
+    mongodb-dev:
+      condition: service_healthy
+    pgvector:
+      condition: service_healthy
+  networks:
+    - development
+    - monitoring
+  <<: *logging
+
 services:
   mongodb-dev:
     image: mongo:7
@@ -515,22 +533,12 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  hivemind-bot:
-    image: ghcr.io/togethercrew/hivemind-bot:main
-    restart: unless-stopped
-    env_file:
-      - ./.env.hivemind-bot
-    depends_on:
-      neo4j-dev:
-        condition: service_healthy
-      mongodb-dev:
-        condition: service_healthy
-      pgvector:
-        condition: service_healthy
-    networks:
-      - development
-      - monitoring
-    <<: *logging
+  hivemind-server:
+    <<: *hivemind-common
+
+  hivemind-worker:
+    <<: *hivemind-common
+    command: python3 worker.py
 
   # AIRFLOW SERVICES - END
 
