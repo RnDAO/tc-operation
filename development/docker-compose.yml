@@ -171,7 +171,7 @@ services:
     volumes:
       - pgvector_data:/var/lib/postgresql/data
     healthcheck:
-      test: "pg_isready -U $POSTGRES_USER"
+      test: pg_isready -U $$POSTGRES_USER
       interval: 10s
       retries: 5
       start_period: 5s
