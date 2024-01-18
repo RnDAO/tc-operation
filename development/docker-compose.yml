@@ -609,7 +609,7 @@ services:
       - loki_volume:/data/loki
     command: -config.file=/etc/loki/loki-config.yaml
     networks:
-      monitoring:
+      development_monitoring:
         ipv4_address: 172.22.22.15
     <<: *logging
 
@@ -657,7 +657,6 @@ networks:
   discourse:
     driver: bridge
   monitoring:
-    name: monitoring
     driver: bridge
     ipam:
       config:
