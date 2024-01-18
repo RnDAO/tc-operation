@@ -609,7 +609,7 @@ services:
       - loki_volume:/data/loki
     command: -config.file=/etc/loki/loki-config.yaml
     networks:
-      development_monitoring:
+      monitoring:
         ipv4_address: 172.22.22.15
     <<: *logging
 
