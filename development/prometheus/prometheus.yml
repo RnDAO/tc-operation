@@ -18,6 +18,6 @@ scrape_configs:
       - traefik:8080
 
 - job_name: tempo
-    static_configs:
-      - targets:
-        - tempo:3200
+  static_configs:
+    - targets:
+      - tempo:3200
