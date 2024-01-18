@@ -21,4 +21,4 @@ datasources:
   jsonData:
     httpMethod: GET
     serviceMap:
-      datasourceUid: prometheus
+      datasourceUid: Prometheus
