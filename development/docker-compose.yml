@@ -657,7 +657,7 @@ networks:
   discourse:
     driver: bridge
   monitoring:
-    name: monitoring
+    driver: bridge
     ipam:
       config:
         - subnet: 172.22.22.0/16
