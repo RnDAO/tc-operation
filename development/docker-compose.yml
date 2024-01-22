@@ -539,7 +539,7 @@ services:
     <<: *hivemind-common
     depends_on:
       <<: *hivemind-common-depends-on
-      - otel-collector
+      otel-collector:
 
   hivemind-worker:
     <<: *hivemind-common
