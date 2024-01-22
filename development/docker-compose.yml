@@ -638,6 +638,8 @@ services:
     networks:
       - monitoring
       - development
+    ports:
+      - 44317:4317
     <<: *logging
 
   tempo:
