@@ -670,6 +670,15 @@ services:
 
   #MONITORING SERVICES - END
 
+  # SERVICE MANAGEMENT - START
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # SERVICE MANAGEMENT - END
+
 volumes:
   mongodb_data_container:
   rmq_data_container:
