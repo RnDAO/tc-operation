@@ -678,6 +678,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WATCHTOWER_SCHEDULE=* * * * *
+    networks:
+      - monitoring
+    <<: *logging
 
   # SERVICE MANAGEMENT - END
 
