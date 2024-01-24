@@ -9,6 +9,62 @@ x-logging:
       loki-retries: 5
       loki-batch-size: 400
 
+x-airflow-common:
+  &airflow-common
+  image: ghcr.io/togethercrew/airflow-dags:main
+  env_file:
+    &airflow-common-env
+    - ./.env.airflow
+  volumes:
+    - airflow_logs:/opt/airflow/logs
+    - airflow_config:/opt/airflow/config
+    - airflow_plugins:/opt/airflow/plugins
+  user: "50000:0"
+  depends_on:
+    &airflow-common-depends-on
+    airflow-redis:
+      condition: service_healthy
+    pgvector:
+      condition: service_healthy
+    neo4j-dev:
+      condition: service_healthy
+  networks:
+    - development
+    - monitoring
+  <<: *logging
+
+x-redis-common:
+  &redis-common
+  image: redis:7.0.11
+  restart: unless-stopped
+  command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+  healthcheck:
+    test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+    interval: 60s
+    timeout: 10s
+    retries: 2
+    start_period: 40s
+  <<: *logging
+
+x-hivemind-common:
+  &hivemind-common
+  image: ghcr.io/togethercrew/hivemind-bot:main
+  restart: unless-stopped
+  env_file:
+    - ./.env.hivemind-bot
+  depends_on:
+    &hivemind-common-depends-on
+    neo4j-dev:
+      condition: service_healthy
+    mongodb-dev:
+      condition: service_healthy
+    pgvector:
+      condition: service_healthy
+  networks:
+    - development
+    - monitoring
+  <<: *logging
+
 services:
   mongodb-dev:
     image: mongo:7
@@ -41,6 +97,7 @@ services:
       - 25672:15672
     volumes:
       - rmq_data_container:/var/lib/rabbitmq/
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
     env_file:
       - ./.env.rmq
     healthcheck:
@@ -119,6 +176,25 @@ services:
       timeout: 10s
       retries: 2
       start_period: 40s
+    networks:
+      - development
+      - monitoring
+    <<: *logging
+
+  pgvector:
+    image: ankane/pgvector
+    ports:
+      - 45432:5432
+    env_file:
+      ./.env.pgvector
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
     networks:
       - development
       - monitoring
@@ -229,141 +305,67 @@ services:
       - monitoring
     <<: *logging
 
-  redis-twitter-bot:
-    image: redis:7.0.11
-    restart: unless-stopped
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    volumes:
-      - type: bind
-        source: ./redis/twitter.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 60s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
-    networks:
-      - development
-      - monitoring
-    <<: *logging
+  # redis-twitter-bot:
+  #   image: redis:7.0.11
+  #   restart: unless-stopped
+  #   command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+  #   volumes:
+  #     - type: bind
+  #       source: ./redis/twitter.conf
+  #       target: /usr/local/etc/redis/redis.conf
+  #       read_only: true
+  #   healthcheck:
+  #     test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+  #     interval: 60s
+  #     timeout: 10s
+  #     retries: 2
+  #     start_period: 40s
+  #   networks:
+  #     - development
+  #     - monitoring
+  #   <<: *logging
 
-  twitter-bot-server:
-    image: ghcr.io/togethercrew/twitter-bot:main
-    command: python3 server.py
-    restart: unless-stopped
-    env_file:
-      - ./.env.twitter
-    depends_on:
-      mongodb-dev:
-        condition: service_healthy
-      neo4j-dev:
-        condition: service_healthy
-      rabbitmq-dev: 
-        condition: service_healthy
-      redis-twitter-bot:
-        condition: service_healthy
-    networks:
-      - development
-      - monitoring
-    <<: *logging
+  # twitter-bot-server:
+  #   image: ghcr.io/togethercrew/twitter-bot:main
+  #   command: python3 server.py
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ./.env.twitter
+  #   depends_on:
+  #     mongodb-dev:
+  #       condition: service_healthy
+  #     neo4j-dev:
+  #       condition: service_healthy
+  #     rabbitmq-dev: 
+  #       condition: service_healthy
+  #     redis-twitter-bot:
+  #       condition: service_healthy
+  #   networks:
+  #     - development
+  #     - monitoring
+  #   <<: *logging
 
-  twitter-bot-worker:
-    image: ghcr.io/togethercrew/twitter-bot:main
-    command: python3 worker.py
-    restart: unless-stopped
-    env_file:
-      - ./.env.twitter
-    depends_on:
-      mongodb-dev:
-        condition: service_healthy
-      neo4j-dev:
-        condition: service_healthy
-      rabbitmq-dev: 
-        condition: service_healthy
-      redis-twitter-bot:
-        condition: service_healthy
-    networks:
-      - development
-      - monitoring
-    <<: *logging
+  # twitter-bot-worker:
+  #   image: ghcr.io/togethercrew/twitter-bot:main
+  #   command: python3 worker.py
+  #   restart: unless-stopped
+  #   env_file:
+  #     - ./.env.twitter
+  #   depends_on:
+  #     mongodb-dev:
+  #       condition: service_healthy
+  #     neo4j-dev:
+  #       condition: service_healthy
+  #     rabbitmq-dev: 
+  #       condition: service_healthy
+  #     redis-twitter-bot:
+  #       condition: service_healthy
+  #   networks:
+  #     - development
+  #     - monitoring
+  #   <<: *logging
 
   # HIVEMIND SERVICES - START
-  hivemind-vector-server:
-    image: ghcr.io/togethercrew/qabot:main-vector_server
-    depends_on:
-      rabbitmq-dev: 
-        condition: service_healthy
-      hivemind-vector-redis:
-        condition: service_healthy
-      hivemind-vector-worker:
-        condition: service_healthy
-    env_file:
-      - .env.hivemind.vector.server
-    networks:
-      - hivemind
-      - development
-      - monitoring
-    <<: *logging
-    ports:
-      - 41234:1234
-
-  hivemind-vector-worker:
-    image: ghcr.io/togethercrew/qabot:main-vector_server
-    env_file:
-      - .env.hivemind.vector.worker
-    depends_on:
-      hivemind-vector-redis:
-        condition: service_healthy
-    command: celery -A tasks.celery worker -c 1 --hostname hivemind-vector-worker --loglevel=info
-    volumes:
-      - hivemind_vector_store:/project/vector_store
-    healthcheck:
-      test: ["CMD-SHELL", "celery -A tasks.celery inspect ping"]
-      interval: 10s
-      timeout: 10s
-      retries: 2
-      start_period: 10s
-    networks:
-      - hivemind
-      - monitoring
-    <<: *logging
-
-  hivemind-vector-redis:
-    image: redis:7.0.11
-    restart: unless-stopped
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    volumes:
-      - type: bind
-        source: ./redis/hivemind.vector.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 60s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
-    networks:
-      - hivemind
-      - monitoring
-    <<: *logging
-
-  hivemind-api:
-    image: ghcr.io/togethercrew/qabot:main-ml
-    env_file:
-      - .env.hivemind.api
-    depends_on:
-      rabbitmq-dev: 
-        condition: service_healthy
-    networks:
-      - hivemind
-      - development
-      - monitoring
-    <<: *logging
-    ports:
-      - 43333:3333
   
   # HIVEMIND SERVICES - END
 
@@ -412,6 +414,262 @@ services:
 
   # DISCOURSE SERVICES - END
 
+  # AIRFLOW SERVICES - START
+
+  airflow-redis:
+    <<: *redis-common
+    volumes:
+      - ./redis/airflow.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - development
+      - monitoring
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - 48080:8080
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-worker:
+    <<: *airflow-common
+    command: celery worker
+    healthcheck:
+      # yamllint disable rule:line-length
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    environment:
+      # Required to handle warm shutdown of the celery workers properly
+      # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
+      DUMB_INIT_SETSID: "0"
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-triggerer:
+    <<: *airflow-common
+    command: triggerer
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command: -c "./init.sh"
+    env_file:
+      - ./.env.airflow
+      - ./.env.airflow.init
+    user: "0:0"
+    volumes:
+      - airflow_sources:/sources
+
+  airflow-cli:
+    <<: *airflow-common
+    profiles:
+      - debug
+    environment:
+      CONNECTION_CHECK_MAX_COUNT: "0"
+    # Workaround for entrypoint issue. See: https://github.com/apache/airflow/issues/16252
+    command: bash -c airflow
+
+  # You can enable flower by adding "--profile flower" option e.g. docker-compose --profile flower up
+  # or by explicitly targeted on the command line e.g. docker-compose up flower.
+  # See: https://docs.docker.com/compose/profiles/
+  flower:
+    <<: *airflow-common
+    command: celery flower
+    profiles:
+      - flower
+    ports:
+      - "5555:5555"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  hivemind-server:
+    <<: *hivemind-common
+    depends_on:
+      <<: *hivemind-common-depends-on
+      # otel-collector:
+
+  hivemind-worker:
+    <<: *hivemind-common
+    command: python3 worker.py
+
+  # AIRFLOW SERVICES - END
+
+  # MONITORING SERVICES - START
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning
+      - grafana_volume:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
+    ports:
+      - 3000:3000
+    networks:
+      - monitoring
+    <<: *logging
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_volume:/prometheus
+    depends_on:
+      - cadvisor
+      - node-exporter
+    networks:
+      - monitoring
+    restart: unless-stopped
+    <<: *logging
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis-cadvisor
+    networks:
+      - monitoring
+    <<: *logging
+
+  redis-cadvisor:
+    image: redis:latest
+    container_name: redis-cadvisor
+    networks:
+      - monitoring
+    <<: *logging
+
+  loki:
+    container_name: loki
+    image: grafana/loki:2.8.0
+    restart: unless-stopped
+    ports:
+      - 3100
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
+      - loki_volume:/data/loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      monitoring:
+        ipv4_address: 172.22.22.15
+    <<: *logging
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - monitoring
+    <<: *logging
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.92.0
+    command: [ "--config=/etc/otel-collector.yaml" ]
+    volumes:
+      - ./otel-collector/otel-collector.yaml:/etc/otel-collector.yaml
+    networks:
+      - monitoring
+      - development
+    <<: *logging
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+      - ./tempo-data/:/tmp/tempo
+    networks:
+      - monitoring
+      - development
+    <<: *logging
+
+  # Generate fake traces...
+  k6-tracing:
+    image: ghcr.io/grafana/xk6-client-tracing:v0.0.2
+    environment:
+      - ENDPOINT=otel-collector:4317
+    restart: always
+    depends_on:
+      - otel-collector
+    networks:
+      - monitoring
+      - development
+    <<: *logging
+
+  #MONITORING SERVICES - END
+
 volumes:
   mongodb_data_container:
   rmq_data_container:
@@ -423,14 +681,21 @@ volumes:
   neo4j_import:
   neo4j_plugins:
   hivemind_vector_store:
+  pgvector_data:
+  airflow_config:
+  airflow_logs:
+  airflow_plugins:
+  airflow_sources:
 
 networks:
   development:
     driver: bridge
-  monitoring:
-    driver: bridge
-    external: true
   hivemind:
     driver: bridge
   discourse:
     driver: bridge
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.22.22.0/16
