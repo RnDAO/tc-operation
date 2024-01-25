@@ -5,8 +5,8 @@ x-sm-resources-common:
   deploy:
     resources:
       limits:
-        cpus: '0.1'
-        memory: 512M
+        cpus: '0.2'
+        memory: 1G
 
 x-md-resources-common:
   &md-resources-common
