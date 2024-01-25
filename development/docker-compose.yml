@@ -1,5 +1,29 @@
 version: '3.8'
 
+x-sm-resources-common:
+  &sm-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '0.1'
+        memory: 512M
+
+x-md-resources-common:
+  &md-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '0.25'
+        memory: 2G
+
+x-lg-resources-common:
+  &lg-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 4G
+
 x-logging:
   &logging
   logging:
@@ -64,24 +88,6 @@ x-hivemind-common:
     - development
     - monitoring
   <<: [*logging, *sm-resources-common]
-
-x-sm-resources-common:
-  &sm-resources-common
-  limits:
-    cpus: 0.1
-    memory: 512M
-
-x-md-resources-common:
-  &md-resources-common
-  limits:
-    cpus: 0.25
-    memory: 2G
-
-x-lg-resources-common:
-  &lg-resources-common
-  limits:
-    cpus: 0.5
-    memory: 4G
 
 services:
   mongodb-dev:
