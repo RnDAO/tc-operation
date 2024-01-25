@@ -105,8 +105,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *md-resources-common
+    <<: [*logging, *md-resources-common]
 
   rabbitmq-dev:
     image: rabbitmq:3-management
