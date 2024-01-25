@@ -65,6 +65,24 @@ x-hivemind-common:
     - monitoring
   <<: *logging
 
+x-sm-resources-common:
+  &sm-resources-common
+  limits:
+    cpus: 0.1
+    memory: 512M
+
+x-md-resources-common:
+  &md-resources-common
+  limits:
+    cpus: 0.25
+    memory: 2G
+
+x-lg-resources-common:
+  &lg-resources-common
+  limits:
+    cpus: 0.5
+    memory: 4G
+
 services:
   mongodb-dev:
     image: mongo:7
@@ -88,6 +106,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *md-resources-common
 
   rabbitmq-dev:
     image: rabbitmq:3-management
@@ -110,6 +129,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *md-resources-common
 
   redis-discord-bot-dev:
     image: redis:7.0.11
@@ -130,6 +150,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *md-resources-common
 
   redis-discord-analyzer-dev:
     image: redis:7.0.11
@@ -150,6 +171,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   neo4j-dev:
     image: neo4j:5.9.0
@@ -180,6 +202,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *lg-resources-common
 
   pgvector:
     image: ankane/pgvector
@@ -199,6 +222,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *md-resources-common
 
   api:
     build:
@@ -226,6 +250,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   redis-api:
     image: redis:7.0.11
@@ -246,6 +271,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   tc-discord-bot-dev:
     build:
@@ -268,6 +294,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   discord-analyzer-server:
     image: ghcr.io/togethercrew/discord-analyzer:pr-60
@@ -284,6 +311,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   discord-analyzer-worker:
     image: ghcr.io/togethercrew/discord-analyzer:pr-60
@@ -304,6 +332,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *md-resources-common
 
   # redis-twitter-bot:
   #   image: redis:7.0.11
@@ -390,6 +419,7 @@ services:
       - discourse
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   discourse:
     image: ghcr.io/togethercrew/discourse:main
@@ -411,6 +441,7 @@ services:
       - development
       - monitoring
     <<: *logging
+    <<: *md-resources-common
 
   # DISCOURSE SERVICES - END
 
@@ -423,6 +454,8 @@ services:
     networks:
       - development
       - monitoring
+    <<: *logging
+    <<: *sm-resources-common
 
   airflow-webserver:
     <<: *airflow-common
@@ -440,6 +473,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    <<: *logging
+    <<: *sm-resources-common
 
   airflow-scheduler:
     <<: *airflow-common
@@ -455,6 +490,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    <<: *logging
+    <<: *sm-resources-common
 
   airflow-worker:
     <<: *airflow-common
@@ -477,6 +514,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    <<: *logging
+    <<: *md-resources-common
 
   airflow-triggerer:
     <<: *airflow-common
@@ -492,6 +531,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    <<: *logging
+    <<: *sm-resources-common
 
   airflow-init:
     <<: *airflow-common
@@ -534,16 +575,19 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    <<: *logging
+    <<: *sm-resources-common
 
   hivemind-server:
     <<: *hivemind-common
     depends_on:
       <<: *hivemind-common-depends-on
-      # otel-collector:
+    <<: *sm-resources-common
 
   hivemind-worker:
     <<: *hivemind-common
     command: python3 worker.py
+    <<: *md-resources-common
 
   # AIRFLOW SERVICES - END
 
@@ -564,6 +608,7 @@ services:
     networks:
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   prometheus:
     image: prom/prometheus:latest
@@ -580,6 +625,7 @@ services:
       - monitoring
     restart: unless-stopped
     <<: *logging
+    <<: *sm-resources-common
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -594,6 +640,7 @@ services:
     networks:
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   redis-cadvisor:
     image: redis:latest
@@ -601,6 +648,7 @@ services:
     networks:
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   loki:
     container_name: loki
@@ -616,6 +664,7 @@ services:
       monitoring:
         ipv4_address: 172.22.22.15
     <<: *logging
+    <<: *sm-resources-common
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -633,6 +682,7 @@ services:
     networks:
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   otel-collector:
     image: otel/opentelemetry-collector:0.92.0
@@ -643,6 +693,7 @@ services:
       - monitoring
       - development
     <<: *logging
+    <<: *sm-resources-common
 
   tempo:
     image: grafana/tempo:latest
@@ -654,19 +705,21 @@ services:
       - monitoring
       - development
     <<: *logging
+    <<: *sm-resources-common
 
   # Generate fake traces...
-  k6-tracing:
-    image: ghcr.io/grafana/xk6-client-tracing:v0.0.2
-    environment:
-      - ENDPOINT=otel-collector:4317
-    restart: always
-    depends_on:
-      - otel-collector
-    networks:
-      - monitoring
-      - development
-    <<: *logging
+  # k6-tracing:
+  #   image: ghcr.io/grafana/xk6-client-tracing:v0.0.2
+  #   environment:
+  #     - ENDPOINT=otel-collector:4317
+  #   restart: always
+  #   depends_on:
+  #     - otel-collector
+  #   networks:
+  #     - monitoring
+  #     - development
+  #   <<: *logging
+  #   <<: *sm-resources-common
 
   #MONITORING SERVICES - END
 
@@ -681,6 +734,7 @@ services:
     networks:
       - monitoring
     <<: *logging
+    <<: *sm-resources-common
 
   # SERVICE MANAGEMENT - END
 
