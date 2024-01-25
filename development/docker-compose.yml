@@ -127,8 +127,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *md-resources-common
+    <<: [*logging, *md-resources-common]
 
   redis-discord-bot-dev:
     image: redis:7.0.11
@@ -148,8 +147,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *md-resources-common
+    <<: [*logging, *md-resources-common]
 
   redis-discord-analyzer-dev:
     image: redis:7.0.11
@@ -169,8 +167,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   neo4j-dev:
     image: neo4j:5.9.0
@@ -200,8 +197,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *lg-resources-common
+    <<: [*logging, *lg-resources-common]
 
   pgvector:
     image: ankane/pgvector
@@ -220,8 +216,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *md-resources-common
+    <<: [*logging, *md-resources-common]
 
   api:
     build:
@@ -248,8 +243,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   redis-api:
     image: redis:7.0.11
@@ -269,8 +263,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   tc-discord-bot-dev:
     build:
@@ -292,8 +285,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   discord-analyzer-server:
     image: ghcr.io/togethercrew/discord-analyzer:pr-60
@@ -309,8 +301,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   discord-analyzer-worker:
     image: ghcr.io/togethercrew/discord-analyzer:pr-60
@@ -330,8 +321,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *md-resources-common
+    <<: [*logging, *md-resources-common]
 
   # redis-twitter-bot:
   #   image: redis:7.0.11
@@ -417,8 +407,7 @@ services:
     networks:
       - discourse
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   discourse:
     image: ghcr.io/togethercrew/discourse:main
@@ -439,8 +428,7 @@ services:
       - discourse
       - development
       - monitoring
-    <<: *logging
-    <<: *md-resources-common
+    <<: [*logging, *md-resources-common]
 
   # DISCOURSE SERVICES - END
 
@@ -453,8 +441,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   airflow-webserver:
     <<: *airflow-common
@@ -472,8 +459,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   airflow-scheduler:
     <<: *airflow-common
@@ -489,8 +475,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   airflow-worker:
     <<: *airflow-common
@@ -513,8 +498,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    <<: *logging
-    <<: *md-resources-common
+    <<: [*logging, *md-resources-common]
 
   airflow-triggerer:
     <<: *airflow-common
@@ -530,8 +514,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   airflow-init:
     <<: *airflow-common
@@ -574,8 +557,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   hivemind-server:
     <<: *hivemind-common
@@ -606,8 +588,7 @@ services:
       - 3000:3000
     networks:
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   prometheus:
     image: prom/prometheus:latest
@@ -623,8 +604,7 @@ services:
     networks:
       - monitoring
     restart: unless-stopped
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -638,16 +618,14 @@ services:
       - redis-cadvisor
     networks:
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   redis-cadvisor:
     image: redis:latest
     container_name: redis-cadvisor
     networks:
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   loki:
     container_name: loki
@@ -662,8 +640,7 @@ services:
     networks:
       monitoring:
         ipv4_address: 172.22.22.15
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -680,8 +657,7 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   otel-collector:
     image: otel/opentelemetry-collector:0.92.0
@@ -691,8 +667,7 @@ services:
     networks:
       - monitoring
       - development
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   tempo:
     image: grafana/tempo:latest
@@ -703,8 +678,7 @@ services:
     networks:
       - monitoring
       - development
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   # Generate fake traces...
   # k6-tracing:
@@ -732,8 +706,7 @@ services:
       - WATCHTOWER_SCHEDULE=* * * * *
     networks:
       - monitoring
-    <<: *logging
-    <<: *sm-resources-common
+    <<: [*logging, *sm-resources-common]
 
   # SERVICE MANAGEMENT - END
 
