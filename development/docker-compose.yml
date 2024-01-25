@@ -31,7 +31,7 @@ x-airflow-common:
   networks:
     - development
     - monitoring
-  <<: *logging
+  <<: [*logging, *sm-resources-common]
 
 x-redis-common:
   &redis-common
@@ -44,7 +44,7 @@ x-redis-common:
     timeout: 10s
     retries: 2
     start_period: 40s
-  <<: *logging
+  <<: [*logging, *sm-resources-common]
 
 x-hivemind-common:
   &hivemind-common
@@ -63,7 +63,7 @@ x-hivemind-common:
   networks:
     - development
     - monitoring
-  <<: *logging
+  <<: [*logging, *sm-resources-common]
 
 x-sm-resources-common:
   &sm-resources-common
@@ -147,7 +147,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: [*logging, *md-resources-common]
+    <<: [*logging, *sm-resources-common]
 
   redis-discord-analyzer-dev:
     image: redis:7.0.11
@@ -441,7 +441,6 @@ services:
     networks:
       - development
       - monitoring
-    <<: [*logging, *sm-resources-common]
 
   airflow-webserver:
     <<: *airflow-common
@@ -459,7 +458,6 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    <<: [*logging, *sm-resources-common]
 
   airflow-scheduler:
     <<: *airflow-common
@@ -475,10 +473,9 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    <<: [*logging, *sm-resources-common]
 
   airflow-worker:
-    <<: *airflow-common
+    <<: [*airflow-common, *md-resources-common]
     command: celery worker
     healthcheck:
       # yamllint disable rule:line-length
@@ -498,7 +495,6 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    <<: [*logging, *md-resources-common]
 
   airflow-triggerer:
     <<: *airflow-common
@@ -514,7 +510,6 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    <<: [*logging, *sm-resources-common]
 
   airflow-init:
     <<: *airflow-common
@@ -557,18 +552,16 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    <<: [*logging, *sm-resources-common]
 
   hivemind-server:
-    <<: *hivemind-common
+    <<: [*hivemind-common, *sm-resources-common]
     depends_on:
       <<: *hivemind-common-depends-on
-    <<: *sm-resources-common
+      
 
   hivemind-worker:
-    <<: *hivemind-common
+    <<: [*hivemind-common, *md-resources-common]
     command: python3 worker.py
-    <<: *md-resources-common
 
   # AIRFLOW SERVICES - END
 
