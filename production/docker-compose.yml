@@ -191,7 +191,7 @@ services:
     networks:
       - production
       - monitoring
-    <<: [*logging, 
+    <<: *logging
 
   tc-discord-bot-prod:
     build:
