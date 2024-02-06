@@ -30,7 +30,7 @@ x-bot-resources-common:
     resources:
       limits:
         cpus: '1'
-        memory: 4G
+        memory: 12G
 
 x-logging:
   &logging
