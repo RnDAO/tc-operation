@@ -1,5 +1,29 @@
 version: '3.9'
 
+x-sm-resources-common:
+  &sm-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '1'
+        memory: 1G
+
+x-md-resources-common:
+  &md-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '2'
+        memory: 2G
+
+x-lg-resources-common:
+  &lg-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '2'
+        memory: 4G
+
 x-logging:
   &logging
   logging:
@@ -181,7 +205,7 @@ services:
     networks:
       - production
       - monitoring
-    <<: *logging
+    <<: [*logging, *sm-resources-common]s
 
   discord-analyzer-server:
     image: ghcr.io/togethercrew/discord-analyzer:main
