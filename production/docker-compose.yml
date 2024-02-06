@@ -205,7 +205,7 @@ services:
     networks:
       - production
       - monitoring
-    <<: [*logging, *sm-resources-common]s
+    <<: [*logging, *sm-resources-common]
 
   discord-analyzer-server:
     image: ghcr.io/togethercrew/discord-analyzer:main
