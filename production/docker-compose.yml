@@ -24,6 +24,14 @@ x-lg-resources-common:
         cpus: '2'
         memory: 4G
 
+x-bot-resources-common:
+  &bot-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '1'
+        memory: 8G
+
 x-logging:
   &logging
   logging:
@@ -183,7 +191,7 @@ services:
     networks:
       - production
       - monitoring
-    <<: *logging
+    <<: [*logging, 
 
   tc-discord-bot-prod:
     build:
@@ -205,7 +213,7 @@ services:
     networks:
       - production
       - monitoring
-    <<: [*logging, *sm-resources-common]
+    <<: [*logging, *bot-resources-common]
 
   discord-analyzer-server:
     image: ghcr.io/togethercrew/discord-analyzer:main
