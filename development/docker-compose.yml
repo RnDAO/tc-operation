@@ -24,6 +24,14 @@ x-lg-resources-common:
         cpus: '2'
         memory: 4G
 
+x-bot-resources-common:
+  &bot-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '1'
+        memory: 4G
+
 x-logging:
   &logging
   logging:
@@ -153,7 +161,7 @@ services:
     networks:
       - development
       - monitoring
-    <<: [*logging, *sm-resources-common]
+    <<: [*logging, *bot-resources-common]
 
   redis-discord-analyzer-dev:
     image: redis:7.0.11
