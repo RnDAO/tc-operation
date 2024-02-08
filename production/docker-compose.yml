@@ -107,6 +107,7 @@ services:
     restart: unless-stopped
     ports:
         - 15672:15672
+        - 6672:5672
     volumes:
         - rmq_data_container:/var/lib/rabbitmq/
     env_file:
