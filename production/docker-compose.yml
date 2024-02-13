@@ -104,9 +104,9 @@ services:
     ports:
       - 37017:27017
     volumes:
-      - mongodb_data_container:/data/db
-      - ../init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
       - ./mongo:/etc/mongo:ro
+      - ../init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+      - mongodb_data_container:/data/db
     networks:
       - production
       - monitoring
