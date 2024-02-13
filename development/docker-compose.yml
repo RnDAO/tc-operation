@@ -272,12 +272,7 @@ services:
     <<: [*logging, *sm-resources-common]
 
   tc-discord-bot-dev:
-    build:
-      context: ../../tc-discordBot
-      target: prod
-      dockerfile: Dockerfile
-      tags:
-        - tc-discord-bot:${VERSION:-latest}
+    image: ghcr.io/togethercrew/discord-bot:pr-167
     restart: unless-stopped
     env_file:
       - ./.env.bot.proc
