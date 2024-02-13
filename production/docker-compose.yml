@@ -5,32 +5,36 @@ x-sm-resources-common:
   deploy:
     resources:
       limits:
-        cpus: '1'
+        cpus: '0.5'
         memory: 1G
+  <<: [*logging]
 
 x-md-resources-common:
   &md-resources-common
   deploy:
     resources:
       limits:
-        cpus: '2'
+        cpus: '1'
         memory: 2G
+  <<: [*logging]
 
 x-lg-resources-common:
   &lg-resources-common
   deploy:
     resources:
       limits:
-        cpus: '2'
+        cpus: '1'
         memory: 4G
+  <<: [*logging]
 
-x-bot-resources-common:
-  &bot-resources-common
+x-xl-resources-common:
+  &xl-resources-common
   deploy:
     resources:
       limits:
-        cpus: '1'
+        cpus: '2'
         memory: 8G
+  <<: [*logging]
 
 x-logging:
   &logging
@@ -77,20 +81,27 @@ x-neo4j-healthcheck:
     retries: 2
     start_period: 40s
 
+x-redis:
+  &redis
+  image: redis:7.2.4
+    restart: unless-stopped
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      - production
+      - monitoring
+    <<: [*redis-healthcheck, *md-resources-common]
+
 services:
-  mongodb-prod:
+
+  ### DATABASES ###
+
+  mongodb:
     image: mongo:latest
-    container_name: mongodb-prod
     restart: unless-stopped
     env_file:
-      - ./.env.db
+      - ./.env.mongodb
     ports:
       - 37017:27017
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "400k"
-        max-file: "20"
     volumes:
       - mongodb_data_container:/data/db
       - type: bind
@@ -100,9 +111,9 @@ services:
     networks:
       - production
       - monitoring
-    <<: *mongodb-healthcheck
+    <<: [*mongodb-healthcheck, *xl-resources-common]
 
-  rabbitmq-prod:
+  rabbitmq:
     image: rabbitmq:3-management
     restart: unless-stopped
     ports:
@@ -111,41 +122,13 @@ services:
     volumes:
         - rmq_data_container:/var/lib/rabbitmq/
     env_file:
-      - ./.env.rmq
+      - ./.env.rabbitmq
     networks:
       - production
       - monitoring
-    <<: [*logging, *rabbitmq-healthcheck]
+    <<: [*rabbitmq-healthcheck, *md-resources-common]
 
-  redis-discord-bot-prod:
-    image: redis:7.0.11
-    restart: unless-stopped
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    volumes:
-      - type: bind
-        source: ./redis/discordBot.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-    networks:
-      - production
-      - monitoring
-    <<: [*logging, *redis-healthcheck]
-
-  redis-discord-analyzer-prod:
-    image: redis:7.0.11
-    restart: unless-stopped
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    volumes:
-      - type: bind
-        source: ./redis/discordAnalyzer.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-    networks:
-      - production
-      - monitoring
-    <<: [*logging, *redis-healthcheck]
-
-  neo4j-prod:
+  neo4j:
     image: neo4j:5.9.0
     restart: unless-stopped
     ports:
@@ -167,9 +150,86 @@ services:
     networks:
       - production
       - monitoring
-    <<: [*logging, *neo4j-healthcheck]
+    <<: [*neo4j-healthcheck, *xl-resources-common]
 
-  tc-server-comm-prod:
+  ### DISCORD BOT ###
+
+  redis-discord:
+    volumes:
+      - ./redis/discord.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+  discord:
+    build:
+      context: ../../tc-discordBot
+      target: prod
+      dockerfile: Dockerfile
+      tags:
+        - tc-discord-bot:${VERSION:-latest}
+    restart: unless-stopped
+    env_file:
+      - ./.env.bot.proc
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis-discord:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - production
+      - monitoring
+    <<: [*lg-resources-common]
+
+  ### ANALYZER ###
+
+  redis-analyzer:
+    volumes:
+      - ./redis/analyzer.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+  analyzer-server:
+    image: ghcr.io/togethercrew/discord-analyzer:main
+    command: python3 server.py
+    restart: unless-stopped
+    env_file:
+      - ./.env.analyzer.proc
+    depends_on:
+      redis-analyzer:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - production
+      - monitoring
+    <<: [*md-resources-common]
+
+  analyzer-worker:
+    image: ghcr.io/togethercrew/discord-analyzer:main
+    command: python3 worker.py
+    restart: unless-stopped
+    env_file:
+      - ./.env.analyzer.proc
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis-analyzer:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    networks:
+      - production
+      - monitoring
+    <<: [*xl-resources-common]
+
+  ### API ###
+
+  redis-api:
+    volumes:
+      - ./redis/api.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+  api:
     build:
       context: ../../tc-serverComm
       dockerfile: Dockerfile
@@ -181,90 +241,22 @@ services:
     ports:
       - $HOST:$PORT:$PORT
     env_file:
-      - ./.env.proc
+      - ./.env.api
     depends_on:
-      mongodb-prod:
+      mongodb:
         condition: service_healthy
-      neo4j-prod:
+      neo4j:
         condition: service_healthy
-      rabbitmq-prod:
+      rabbitmq:
+        condition: service_healthy
+      redis-api:
         condition: service_healthy
     networks:
       - production
       - monitoring
-    <<: *logging
+    <<: [*md-resources-common]
 
-  tc-discord-bot-prod:
-    build:
-      context: ../../tc-discordBot
-      target: prod
-      dockerfile: Dockerfile
-      tags:
-        - tc-discord-bot:${VERSION:-latest}
-    restart: unless-stopped
-    env_file:
-      - ./.env.bot.proc
-    depends_on:
-      mongodb-prod:
-        condition: service_healthy
-      redis-discord-bot-prod:
-        condition: service_healthy
-      rabbitmq-prod:
-        condition: service_healthy
-    networks:
-      - production
-      - monitoring
-    <<: [*logging, *bot-resources-common]
-
-  discord-analyzer-server:
-    image: ghcr.io/togethercrew/discord-analyzer:main
-    command: python3 server.py
-    restart: unless-stopped
-    env_file:
-      - ./.env.analyzer.proc
-    depends_on:
-      redis-discord-analyzer-prod:
-        condition: service_healthy
-      rabbitmq-prod:
-        condition: service_healthy
-    networks:
-      - production
-      - monitoring
-    <<: *logging
-
-  discord-analyzer-worker:
-    image: ghcr.io/togethercrew/discord-analyzer:main
-    command: python3 worker.py
-    restart: unless-stopped
-    env_file:
-      - ./.env.analyzer.proc
-    depends_on:
-      mongodb-prod:
-        condition: service_healthy
-      redis-discord-analyzer-prod:
-        condition: service_healthy
-      neo4j-prod:
-        condition: service_healthy
-    networks:
-      - production
-      - monitoring
-    <<: *logging
-
-  # manual-triggers:
-  #   build:
-  #     context: ../../manual-triggers
-  #     dockerfile: Dockerfile
-  #     tags:
-  #       - manual-triggers:${VERSION:-latest}
-  #   env_file:
-  #     - ./.env.manual-triggers
-  #   depends_on:
-  #     - mongodb-prod
-  #     - rabbitmq-prod
-  #   networks:
-  #     - production
-  #     - monitoring
-  #   <<: *logging
+  ### OTHER ###
 
 volumes:
   mongodb_data_container:
