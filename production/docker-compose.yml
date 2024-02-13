@@ -66,7 +66,7 @@ x-rabbitmq-healthcheck:
 x-mongodb-healthcheck:
   &mongodb-healthcheck
   healthcheck:
-      test: echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+      test: test $(echo $(mongosh -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD --quiet /etc/mongo/healthcheck.js)) -eq 1
       interval: 60s
       timeout: 10s
       retries: 2
@@ -96,18 +96,17 @@ services:
   ### DATABASES ###
 
   mongodb:
-    image: mongo:latest
+    image: mongo:7
     restart: unless-stopped
+    command: ['--replSet', 'rs0', '--keyFile', '/etc/mongo/replica.key']
     env_file:
       - ./.env.mongodb
     ports:
       - 37017:27017
     volumes:
       - mongodb_data_container:/data/db
-      - type: bind
-        source: ../init-mongo.sh
-        target: /docker-entrypoint-initdb.d/init-mongo.sh
-        read_only: true
+      - ../init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+      - ./mongo:/etc/mongo:ro
     networks:
       - production
       - monitoring
