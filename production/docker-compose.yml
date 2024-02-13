@@ -168,7 +168,7 @@ services:
         - tc-discord-bot:${VERSION:-latest}
     restart: unless-stopped
     env_file:
-      - ./.env.bot.proc
+      - ./.env.discord
     depends_on:
       mongodb:
         condition: service_healthy
