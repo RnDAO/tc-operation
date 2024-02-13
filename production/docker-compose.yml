@@ -89,7 +89,7 @@ x-redis:
   networks:
     - production
     - monitoring
-    <<: [*redis-healthcheck, *md-resources-common]
+  <<: [*redis-healthcheck, *md-resources-common]
 
 services:
 
