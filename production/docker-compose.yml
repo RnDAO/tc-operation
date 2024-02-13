@@ -1,5 +1,14 @@
 version: '3.9'
 
+x-logging:
+  &logging
+  logging:
+    driver: loki
+    options:
+      loki-url: http://172.22.22.15:3100/loki/api/v1/push
+      loki-retries: 5
+      loki-batch-size: 400
+
 x-sm-resources-common:
   &sm-resources-common
   deploy:
@@ -35,15 +44,6 @@ x-xl-resources-common:
         cpus: '2'
         memory: 8G
   <<: [*logging]
-
-x-logging:
-  &logging
-  logging:
-    driver: loki
-    options:
-      loki-url: http://172.22.22.15:3100/loki/api/v1/push
-      loki-retries: 5
-      loki-batch-size: 400
 
 x-redis-healthcheck:
   &redis-healthcheck
