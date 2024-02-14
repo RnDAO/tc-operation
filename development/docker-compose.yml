@@ -307,7 +307,7 @@ services:
     networks:
       - production
       - monitoring
-    <<: [*sm-resources-common]
+    <<: [*lg-resources-common]
 
   analyzer-server:
     container_name: analyzer-server
