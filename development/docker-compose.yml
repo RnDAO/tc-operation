@@ -276,6 +276,8 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env.bot.proc
+    ports:
+      - 3300:3000
     depends_on:
       mongodb-dev:
         condition: service_healthy
