@@ -6,7 +6,7 @@ function run() {
       var config = {
         _id: "rs0",
         members: [
-          { _id: 0, host: "mongodb-dev" },
+          { _id: 0, host: "mongodb" },
         ]
       }
       rs.initiate(config)
