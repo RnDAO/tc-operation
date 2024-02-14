@@ -611,8 +611,6 @@ services:
     command: --interval 10 --http-api-metrics --http-api-token demotoken --debug prometheus grafana parent child
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - WATCHTOWER_SCHEDULE=* * * * *
     networks:
       - monitoring
     <<: [*sm-resources-common]
