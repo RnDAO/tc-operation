@@ -252,6 +252,8 @@ services:
 
   redis-cadvisor:
     container_name: redis-cadvisor
+    volumes:
+      - ./redis/cadvisor.conf:/usr/local/etc/redis/redis.conf:ro
     <<: [*redis]
 
 
