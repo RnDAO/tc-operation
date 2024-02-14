@@ -120,7 +120,7 @@ x-hivemind-common:
   image: ghcr.io/togethercrew/hivemind-bot:main
   restart: unless-stopped
   env_file:
-    - ./.env.hivemind-bot
+    - ./.env.hivemind
   depends_on:
     &hivemind-common-depends-on
     neo4j:
