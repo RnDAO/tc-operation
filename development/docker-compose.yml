@@ -141,6 +141,7 @@ services:
   ### DATABASES ###
 
   mongodb:
+    container_name: mongodb
     image: mongo:7
     restart: unless-stopped
     command: ['--replSet', 'rs0', '--keyFile', '/etc/mongo/replica.key']
@@ -158,6 +159,7 @@ services:
     <<: [*mongodb-healthcheck, *md-resources-common]
 
   rabbitmq:
+    container_name: rabbitmq
     image: rabbitmq:3-management
     restart: unless-stopped
     ports:
@@ -174,6 +176,7 @@ services:
     <<: [*rabbitmq-healthcheck, *md-resources-common]
 
   neo4j:
+    container_name: neo4j
     image: neo4j:5.9.0
     restart: unless-stopped
     ports:
@@ -198,6 +201,7 @@ services:
     <<: [*neo4j-healthcheck, *xl-resources-common]
 
   pgvector:
+    container_name: pgvector
     image: ankane/pgvector
     ports:
       - 45432:5432
@@ -217,34 +221,44 @@ services:
     <<: [*md-resources-common]
 
   redis-discord:
+    container_name: redis-discord
     volumes:
       - ./redis/discord.conf:/usr/local/etc/redis/redis.conf:ro
     <<: [*redis]
 
   redis-analyzer:
+    container_name: redis-analyzer
     volumes:
       - ./redis/analyzer.conf:/usr/local/etc/redis/redis.conf:ro
     <<: [*redis]
 
   redis-api:
+    container_name: redis-api
     volumes:
       - ./redis/api.conf:/usr/local/etc/redis/redis.conf:ro
     <<: [*redis]
 
   redis-discourse:
+    container_name: redis-discourse
     volumes:
       - ./redis/discourse.conf:/usr/local/etc/redis/redis.conf:ro
     <<: [*redis]
 
   redis-airflow:
+    container_name: redis-airflow
     volumes:
       - ./redis/airflow.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+  redis-cadvisor:
+    container_name: redis-cadvisor
     <<: [*redis]
 
 
   ### SERVICES ###
 
   api:
+    container_name: api
     build:
       context: ../../api
       dockerfile: Dockerfile
@@ -274,6 +288,7 @@ services:
     <<: [*sm-resources-common]
 
   discord:
+    container_name: discord
     image: ghcr.io/togethercrew/discord-bot:pr-167
     restart: unless-stopped
     env_file:
@@ -293,6 +308,7 @@ services:
     <<: [*sm-resources-common]
 
   analyzer-server:
+    container_name: analyzer-server
     image: ghcr.io/togethercrew/discord-analyzer:pr-60
     command: python3 server.py
     restart: unless-stopped
@@ -309,6 +325,7 @@ services:
     <<: [*sm-resources-common]
 
   analyzer-worker:
+    container_name: analyzer-worker
     image: ghcr.io/togethercrew/discord-analyzer:pr-60
     command: python3 worker.py
     restart: unless-stopped
@@ -329,6 +346,7 @@ services:
     <<: [*md-resources-common]
 
   discourse:
+    container_name: discourse
     image: ghcr.io/togethercrew/discourse:main
     command: yarn run start:prod
     restart: always
@@ -352,6 +370,7 @@ services:
   ### AIRFLOW ###
 
   airflow-webserver:
+    container_name: airflow-webserver
     <<: *airflow-common
     command: webserver
     ports:
@@ -369,6 +388,7 @@ services:
         condition: service_completed_successfully
 
   airflow-scheduler:
+    container_name: airflow-scheduler
     <<: *airflow-common
     command: scheduler
     healthcheck:
@@ -384,6 +404,7 @@ services:
         condition: service_completed_successfully
 
   airflow-worker:
+    container_name: airflow-worker
     <<: [*airflow-common, *md-resources-common]
     command: celery worker
     healthcheck:
@@ -406,6 +427,7 @@ services:
         condition: service_completed_successfully
 
   airflow-triggerer:
+    container_name: airflow-triggerer
     <<: *airflow-common
     command: triggerer
     healthcheck:
@@ -421,6 +443,7 @@ services:
         condition: service_completed_successfully
 
   airflow-init:
+    container_name: airflow-init
     <<: *airflow-common
     entrypoint: /bin/bash
     command: -c "./init.sh"
@@ -432,6 +455,7 @@ services:
       - airflow_sources:/sources
 
   airflow-cli:
+    container_name: airflow-cli
     <<: *airflow-common
     profiles:
       - debug
@@ -444,6 +468,7 @@ services:
   # or by explicitly targeted on the command line e.g. docker-compose up flower.
   # See: https://docs.docker.com/compose/profiles/
   flower:
+    container_name: flower
     <<: *airflow-common
     command: celery flower
     profiles:
@@ -463,19 +488,21 @@ services:
         condition: service_completed_successfully
 
   hivemind-server:
+    container_name: hivemind-server
     <<: [*hivemind-common, *sm-resources-common]
     depends_on:
       <<: *hivemind-common-depends-on
 
   hivemind-worker:
+    container_name: hivemind-worker
     <<: [*hivemind-common, *md-resources-common]
     command: python3 worker.py
 
   ### MONITORING
 
   grafana:
-    image: grafana/grafana
     container_name: grafana
+    image: grafana/grafana
     restart: always
     volumes:
       - ./grafana/provisioning/:/etc/grafana/provisioning
@@ -490,8 +517,8 @@ services:
     <<: [*sm-resources-common]
 
   prometheus:
-    image: prom/prometheus:latest
     container_name: prometheus
+    image: prom/prometheus:latest
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
@@ -506,8 +533,8 @@ services:
     <<: [*sm-resources-common]
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor:latest
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -515,13 +542,6 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     depends_on:
       - redis-cadvisor
-    networks:
-      - monitoring
-    <<: [*sm-resources-common]
-
-  redis-cadvisor:
-    image: redis:latest
-    container_name: redis-cadvisor
     networks:
       - monitoring
     <<: [*sm-resources-common]
@@ -542,8 +562,8 @@ services:
     <<: [*sm-resources-common]
 
   node-exporter:
-    image: prom/node-exporter:latest
     container_name: node-exporter
+    image: prom/node-exporter:latest
     restart: unless-stopped
     volumes:
       - /proc:/host/proc:ro
@@ -559,6 +579,7 @@ services:
     <<: [*sm-resources-common]
 
   otel-collector:
+    container_name: otel-collector
     image: otel/opentelemetry-collector:0.92.0
     command: [ "--config=/etc/otel-collector.yaml" ]
     volumes:
@@ -569,6 +590,7 @@ services:
     <<: [*sm-resources-common]
 
   tempo:
+    container_name: tempo
     image: grafana/tempo:latest
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
@@ -582,6 +604,7 @@ services:
   ### SERVICE MANAGEMENT ###
 
   watchtower:
+    container_name: watchtower
     image: containrrr/watchtower
     command: --interval 10 --http-api-metrics --http-api-token demotoken --debug prometheus grafana parent child
     volumes:
