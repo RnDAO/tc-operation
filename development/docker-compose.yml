@@ -1,7 +1,5 @@
 version: '3.9'
 
-name: staging
-
 x-logging:
   &logging
   logging:
