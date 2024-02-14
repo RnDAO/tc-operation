@@ -21,3 +21,11 @@ scrape_configs:
   static_configs:
     - targets:
       - tempo:3200
+
+- job_name: watchtower
+  scrape_interval: 5s
+  metrics_path: /v1/metrics
+  bearer_token: demotoken
+  static_configs:
+    - targets:
+      - watchtower:8080
