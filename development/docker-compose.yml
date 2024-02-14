@@ -1,28 +1,4 @@
-version: '3.8'
-
-x-sm-resources-common:
-  &sm-resources-common
-  deploy:
-    resources:
-      limits:
-        cpus: '1'
-        memory: 1G
-
-x-md-resources-common:
-  &md-resources-common
-  deploy:
-    resources:
-      limits:
-        cpus: '2'
-        memory: 2G
-
-x-lg-resources-common:
-  &lg-resources-common
-  deploy:
-    resources:
-      limits:
-        cpus: '2'
-        memory: 4G
+version: '3.9'
 
 x-logging:
   &logging
@@ -32,6 +8,88 @@ x-logging:
       loki-url: http://172.22.22.15:3100/loki/api/v1/push
       loki-retries: 5
       loki-batch-size: 400
+
+x-sm-resources-common:
+  &sm-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 1G
+  <<: [*logging]
+
+x-md-resources-common:
+  &md-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '1'
+        memory: 2G
+  <<: [*logging]
+
+x-lg-resources-common:
+  &lg-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '1'
+        memory: 4G
+  <<: [*logging]
+
+x-xl-resources-common:
+  &xl-resources-common
+  deploy:
+    resources:
+      limits:
+        cpus: '2'
+        memory: 8G
+  <<: [*logging]
+
+x-redis-healthcheck:
+  &redis-healthcheck
+  healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+
+x-rabbitmq-healthcheck:
+  &rabbitmq-healthcheck
+  healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 2
+      start_period: 40s
+
+x-mongodb-healthcheck:
+  &mongodb-healthcheck
+  healthcheck:
+      test: test $(echo $(mongosh -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD --quiet /etc/mongo/healthcheck.js)) -eq 1
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 40s
+
+x-neo4j-healthcheck:
+  &neo4j-healthcheck
+  healthcheck:
+    test: ["CMD" ,"wget", "http://localhost:7474"]
+    interval: 1m30s
+    timeout: 10s
+    retries: 2
+    start_period: 40s
+
+x-redis:
+  &redis
+  image: redis:7.2.4
+  restart: unless-stopped
+  command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+  networks:
+    - production
+    - monitoring
+  <<: [*redis-healthcheck, *md-resources-common]
 
 x-airflow-common:
   &airflow-common
@@ -46,29 +104,16 @@ x-airflow-common:
   user: "50000:0"
   depends_on:
     &airflow-common-depends-on
-    airflow-redis:
+    redis-airflow:
       condition: service_healthy
     pgvector:
       condition: service_healthy
-    neo4j-dev:
+    neo4j:
       condition: service_healthy
   networks:
-    - development
+    - production
     - monitoring
-  <<: [*logging, *sm-resources-common]
-
-x-redis-common:
-  &redis-common
-  image: redis:7.0.11
-  restart: unless-stopped
-  command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-  healthcheck:
-    test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-    interval: 60s
-    timeout: 10s
-    retries: 2
-    start_period: 40s
-  <<: [*logging, *sm-resources-common]
+  <<: [*sm-resources-common]
 
 x-hivemind-common:
   &hivemind-common
@@ -78,42 +123,39 @@ x-hivemind-common:
     - ./.env.hivemind-bot
   depends_on:
     &hivemind-common-depends-on
-    neo4j-dev:
+    neo4j:
       condition: service_healthy
-    mongodb-dev:
+    mongodb:
       condition: service_healthy
     pgvector:
       condition: service_healthy
   networks:
-    - development
+    - production
     - monitoring
-  <<: [*logging, *sm-resources-common]
+  <<: [*sm-resources-common]
 
 services:
-  mongodb-dev:
+
+  ### DATABASES ###
+
+  mongodb:
     image: mongo:7
     restart: unless-stopped
     command: ['--replSet', 'rs0', '--keyFile', '/etc/mongo/replica.key']
     ports:
       - 37017:27017
     env_file:
-      - ./.env.db
+      - ./.env.mongodb
     volumes:
       - ../init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
       - ./mongo:/etc/mongo:ro
       - mongodb_data_container:/data/db
-    healthcheck:
-      test: test $(echo $(mongosh -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD --quiet /etc/mongo/healthcheck.js)) -eq 1
-      interval: 60s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
     networks:
-      - development
+      - production
       - monitoring
-    <<: [*logging, *md-resources-common]
+    <<: [*mongodb-healthcheck, *md-resources-common]
 
-  rabbitmq-dev:
+  rabbitmq:
     image: rabbitmq:3-management
     restart: unless-stopped
     ports:
@@ -123,59 +165,13 @@ services:
       - rmq_data_container:/var/lib/rabbitmq/
       - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
     env_file:
-      - ./.env.rmq
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 2
-      start_period: 40s
+      - ./.env.rabbitmq
     networks:
-      - development
+      - production
       - monitoring
-    <<: [*logging, *md-resources-common]
+    <<: [*rabbitmq-healthcheck, *md-resources-common]
 
-  redis-discord-bot-dev:
-    image: redis:7.0.11
-    restart: unless-stopped
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    volumes:
-      - type: bind
-        source: ./redis/discordBot.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 60s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
-    networks:
-      - development
-      - monitoring
-    <<: [*logging, *sm-resources-common]
-
-  redis-discord-analyzer-dev:
-    image: redis:7.0.11
-    restart: unless-stopped
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    volumes:
-      - type: bind
-        source: ./redis/discordAnalyzer.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 60s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
-    networks:
-      - development
-      - monitoring
-    <<: [*logging, *sm-resources-common]
-
-  neo4j-dev:
+  neo4j:
     image: neo4j:5.9.0
     restart: unless-stopped
     ports:
@@ -194,16 +190,10 @@ services:
       - NEO4J_server.memory.heap.max_size=4G
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
-    healthcheck:
-      test: ["CMD" ,"wget", "http://localhost:7474"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
     networks:
-      - development
+      - production
       - monitoring
-    <<: [*logging, *lg-resources-common]
+    <<: [*neo4j-healthcheck, *xl-resources-common]
 
   pgvector:
     image: ankane/pgvector
@@ -220,9 +210,37 @@ services:
       start_period: 5s
     restart: always
     networks:
-      - development
+      - production
       - monitoring
-    <<: [*logging, *md-resources-common]
+    <<: [*md-resources-common]
+
+  redis-discord:
+    volumes:
+      - ./redis/discord.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+  redis-analyzer:
+    volumes:
+      - ./redis/analyzer.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+  redis-api:
+    volumes:
+      - ./redis/api.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+  redis-discourse:
+    volumes:
+      - ./redis/discourse.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+  redis-airflow:
+    volumes:
+      - ./redis/airflow.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+
+  ### SERVICES ###
 
   api:
     build:
@@ -236,181 +254,77 @@ services:
     ports:
       - $HOST:$PORT:$PORT
     env_file:
-      - ./.env.proc
+      - ./.env.api
     depends_on:
-      mongodb-dev:
+      mongodb:
         condition: service_healthy
-      neo4j-dev:
+      neo4j:
         condition: service_healthy
-      rabbitmq-dev:
+      rabbitmq:
         condition: service_healthy
       redis-api:
         condition: service_healthy
     networks:
-      - development
+      - production
       - monitoring
-    <<: [*logging, *sm-resources-common]
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+    <<: [*sm-resources-common]
 
-  redis-api:
-    image: redis:7.0.11
-    restart: unless-stopped
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    volumes:
-      - type: bind
-        source: ./redis/api.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 60s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
-    networks:
-      - development
-      - monitoring
-    <<: [*logging, *sm-resources-common]
-
-  tc-discord-bot-dev:
+  discord:
     image: ghcr.io/togethercrew/discord-bot:pr-167
     restart: unless-stopped
     env_file:
-      - ./.env.bot.proc
+      - ./.env.discord
     ports:
       - 3300:3000
     depends_on:
-      mongodb-dev:
+      mongodb:
         condition: service_healthy
-      redis-discord-bot-dev:
+      redis-discord:
         condition: service_healthy
-      rabbitmq-dev:
+      rabbitmq:
         condition: service_healthy
     networks:
-      - development
+      - production
       - monitoring
-    <<: [*logging, *sm-resources-common]
+    <<: [*sm-resources-common]
 
-  discord-analyzer-server:
+  analyzer-server:
     image: ghcr.io/togethercrew/discord-analyzer:pr-60
     command: python3 server.py
     restart: unless-stopped
     env_file:
-      - ./.env.analyzer.proc
+      - ./.env.analyzer
     depends_on:
-      redis-discord-analyzer-dev:
+      redis-analyzer:
         condition: service_healthy
-      rabbitmq-dev:
+      rabbitmq:
         condition: service_healthy
     networks:
-      - development
+      - production
       - monitoring
-    <<: [*logging, *sm-resources-common]
+    <<: [*sm-resources-common]
 
-  discord-analyzer-worker:
+  analyzer-worker:
     image: ghcr.io/togethercrew/discord-analyzer:pr-60
     command: python3 worker.py
     restart: unless-stopped
     env_file:
-      - ./.env.analyzer.proc
+      - ./.env.analyzer
     depends_on:
-      mongodb-dev:
+      mongodb:
         condition: service_healthy
-      redis-discord-analyzer-dev:
+      redis-analyzer:
         condition: service_healthy
-      neo4j-dev:
+      neo4j:
         condition: service_healthy
-      rabbitmq-dev:
+      rabbitmq:
         condition: service_healthy
     networks:
-      - development
+      - production
       - monitoring
-    <<: [*logging, *md-resources-common]
-
-  # redis-twitter-bot:
-  #   image: redis:7.0.11
-  #   restart: unless-stopped
-  #   command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-  #   volumes:
-  #     - type: bind
-  #       source: ./redis/twitter.conf
-  #       target: /usr/local/etc/redis/redis.conf
-  #       read_only: true
-  #   healthcheck:
-  #     test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-  #     interval: 60s
-  #     timeout: 10s
-  #     retries: 2
-  #     start_period: 40s
-  #   networks:
-  #     - development
-  #     - monitoring
-  #   <<: *logging
-
-  # twitter-bot-server:
-  #   image: ghcr.io/togethercrew/twitter-bot:main
-  #   command: python3 server.py
-  #   restart: unless-stopped
-  #   env_file:
-  #     - ./.env.twitter
-  #   depends_on:
-  #     mongodb-dev:
-  #       condition: service_healthy
-  #     neo4j-dev:
-  #       condition: service_healthy
-  #     rabbitmq-dev: 
-  #       condition: service_healthy
-  #     redis-twitter-bot:
-  #       condition: service_healthy
-  #   networks:
-  #     - development
-  #     - monitoring
-  #   <<: *logging
-
-  # twitter-bot-worker:
-  #   image: ghcr.io/togethercrew/twitter-bot:main
-  #   command: python3 worker.py
-  #   restart: unless-stopped
-  #   env_file:
-  #     - ./.env.twitter
-  #   depends_on:
-  #     mongodb-dev:
-  #       condition: service_healthy
-  #     neo4j-dev:
-  #       condition: service_healthy
-  #     rabbitmq-dev: 
-  #       condition: service_healthy
-  #     redis-twitter-bot:
-  #       condition: service_healthy
-  #   networks:
-  #     - development
-  #     - monitoring
-  #   <<: *logging
-
-  # HIVEMIND SERVICES - START
-  
-  # HIVEMIND SERVICES - END
-
-  # DISCOURSE SERVICES - START
-
-  discourse-redis:
-    image: redis:7.0.11
-    restart: unless-stopped
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
-    volumes:
-      - type: bind
-        source: ./redis/discourse.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 60s
-      timeout: 10s
-      retries: 2
-      start_period: 40s
-    networks:
-      - discourse
-      - monitoring
-    <<: [*logging, *sm-resources-common]
+    <<: [*md-resources-common]
 
   discourse:
     image: ghcr.io/togethercrew/discourse:main
@@ -421,29 +335,19 @@ services:
     env_file:
       - .env.discourse
     depends_on:
-      discourse-redis:
+      redis-discourse:
         condition: service_healthy
-      rabbitmq-dev:
+      rabbitmq:
         condition: service_healthy
-      neo4j-dev:
+      neo4j:
         condition: service_healthy
     networks:
       - discourse
-      - development
+      - production
       - monitoring
-    <<: [*logging, *md-resources-common]
+    <<: [*md-resources-common]
 
-  # DISCOURSE SERVICES - END
-
-  # AIRFLOW SERVICES - START
-
-  airflow-redis:
-    <<: *redis-common
-    volumes:
-      - ./redis/airflow.conf:/usr/local/etc/redis/redis.conf:ro
-    networks:
-      - development
-      - monitoring
+  ### AIRFLOW ###
 
   airflow-webserver:
     <<: *airflow-common
@@ -560,15 +464,12 @@ services:
     <<: [*hivemind-common, *sm-resources-common]
     depends_on:
       <<: *hivemind-common-depends-on
-      
 
   hivemind-worker:
     <<: [*hivemind-common, *md-resources-common]
     command: python3 worker.py
 
-  # AIRFLOW SERVICES - END
-
-  # MONITORING SERVICES - START
+  ### MONITORING
 
   grafana:
     image: grafana/grafana
@@ -584,7 +485,7 @@ services:
       - 3000:3000
     networks:
       - monitoring
-    <<: [*logging, *sm-resources-common]
+    <<: [*sm-resources-common]
 
   prometheus:
     image: prom/prometheus:latest
@@ -600,7 +501,7 @@ services:
     networks:
       - monitoring
     restart: unless-stopped
-    <<: [*logging, *sm-resources-common]
+    <<: [*sm-resources-common]
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -614,14 +515,14 @@ services:
       - redis-cadvisor
     networks:
       - monitoring
-    <<: [*logging, *sm-resources-common]
+    <<: [*sm-resources-common]
 
   redis-cadvisor:
     image: redis:latest
     container_name: redis-cadvisor
     networks:
       - monitoring
-    <<: [*logging, *sm-resources-common]
+    <<: [*sm-resources-common]
 
   loki:
     container_name: loki
@@ -636,7 +537,7 @@ services:
     networks:
       monitoring:
         ipv4_address: 172.22.22.15
-    <<: [*logging, *sm-resources-common]
+    <<: [*sm-resources-common]
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -653,7 +554,7 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
       - monitoring
-    <<: [*logging, *sm-resources-common]
+    <<: [*sm-resources-common]
 
   otel-collector:
     image: otel/opentelemetry-collector:0.92.0
@@ -662,8 +563,8 @@ services:
       - ./otel-collector/otel-collector.yaml:/etc/otel-collector.yaml
     networks:
       - monitoring
-      - development
-    <<: [*logging, *sm-resources-common]
+      - production
+    <<: [*sm-resources-common]
 
   tempo:
     image: grafana/tempo:latest
@@ -673,26 +574,10 @@ services:
       - ./tempo-data/:/tmp/tempo
     networks:
       - monitoring
-      - development
-    <<: [*logging, *sm-resources-common]
+      - production
+    <<: [*sm-resources-common]
 
-  # Generate fake traces...
-  # k6-tracing:
-  #   image: ghcr.io/grafana/xk6-client-tracing:v0.0.2
-  #   environment:
-  #     - ENDPOINT=otel-collector:4317
-  #   restart: always
-  #   depends_on:
-  #     - otel-collector
-  #   networks:
-  #     - monitoring
-  #     - development
-  #   <<: *logging
-  #   <<: *sm-resources-common
-
-  #MONITORING SERVICES - END
-
-  # SERVICE MANAGEMENT - START
+  ### SERVICE MANAGEMENT ###
 
   watchtower:
     image: containrrr/watchtower
@@ -702,9 +587,7 @@ services:
       - WATCHTOWER_SCHEDULE=* * * * *
     networks:
       - monitoring
-    <<: [*logging, *sm-resources-common]
-
-  # SERVICE MANAGEMENT - END
+    <<: [*sm-resources-common]
 
 volumes:
   mongodb_data_container:
@@ -724,7 +607,7 @@ volumes:
   airflow_sources:
 
 networks:
-  development:
+  production:
     driver: bridge
   hivemind:
     driver: bridge
