@@ -159,15 +159,12 @@ services:
     <<: [*redis]
 
   discord:
-    build:
-      context: ../../tc-discordBot
-      target: prod
-      dockerfile: Dockerfile
-      tags:
-        - tc-discord-bot:${VERSION:-latest}
+    image: ghcr.io/togethercrew/discord-bot:main
     restart: unless-stopped
     env_file:
       - ./.env.discord
+    ports:
+      - 3300:3000
     depends_on:
       mongodb:
         condition: service_healthy
