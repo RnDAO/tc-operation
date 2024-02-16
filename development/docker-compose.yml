@@ -291,7 +291,7 @@ services:
 
   discord:
     container_name: discord
-    image: ghcr.io/togethercrew/discord-bot:pr-173
+    image: ghcr.io/togethercrew/discord-bot:development
     restart: unless-stopped
     env_file:
       - ./.env.discord
