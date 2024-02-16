@@ -142,7 +142,7 @@ services:
 
   mongodb:
     container_name: mongodb
-    image: mongo:7
+    image: mongo:7.0.5
     restart: unless-stopped
     command: ['--replSet', 'rs0', '--keyFile', '/etc/mongo/replica.key']
     ports:
@@ -160,7 +160,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:3-management
+    image: rabbitmq:3.12.12-management
     restart: unless-stopped
     ports:
       - 6672:5672
@@ -202,7 +202,7 @@ services:
 
   pgvector:
     container_name: pgvector
-    image: ankane/pgvector
+    image: ankane/pgvector:v0.5.1
     ports:
       - 45432:5432
     env_file:

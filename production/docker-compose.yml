@@ -96,7 +96,8 @@ services:
   ### DATABASES ###
 
   mongodb:
-    image: mongo:7
+    container_name: mongodb
+    image: mongo:7.0.5
     restart: unless-stopped
     command: ['--replSet', 'rs0', '--keyFile', '/etc/mongo/replica.key']
     env_file:
@@ -113,7 +114,8 @@ services:
     <<: [*mongodb-healthcheck, *xl-resources-common]
 
   rabbitmq:
-    image: rabbitmq:3-management
+    container_name: rabbitmq
+    image: rabbitmq:3.12.12-management
     restart: unless-stopped
     ports:
         - 15672:15672
@@ -128,6 +130,7 @@ services:
     <<: [*rabbitmq-healthcheck, *md-resources-common]
 
   neo4j:
+    container_name: neo4j
     image: neo4j:5.9.0
     restart: unless-stopped
     ports:
@@ -151,14 +154,28 @@ services:
       - monitoring
     <<: [*neo4j-healthcheck, *xl-resources-common]
 
-  ### DISCORD BOT ###
-
   redis-discord:
+    container_name: redis-discord
     volumes:
       - ./redis/discord.conf:/usr/local/etc/redis/redis.conf:ro
     <<: [*redis]
 
+  redis-analyzer:
+    container_name: redis-analyzer
+    volumes:
+      - ./redis/analyzer.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+  redis-api:
+    container_name: redis-api
+    volumes:
+      - ./redis/api.conf:/usr/local/etc/redis/redis.conf:ro
+    <<: [*redis]
+
+  ### SERVICES ###
+
   discord:
+    container_name: discord
     image: ghcr.io/togethercrew/discord-bot:main
     restart: unless-stopped
     env_file:
@@ -177,14 +194,8 @@ services:
       - monitoring
     <<: [*lg-resources-common]
 
-  ### ANALYZER ###
-
-  redis-analyzer:
-    volumes:
-      - ./redis/analyzer.conf:/usr/local/etc/redis/redis.conf:ro
-    <<: [*redis]
-
   analyzer-server:
+    container_name: analyzer-server
     image: ghcr.io/togethercrew/discord-analyzer:main
     command: python3 server.py
     restart: unless-stopped
@@ -201,6 +212,7 @@ services:
     <<: [*md-resources-common]
 
   analyzer-worker:
+    container_name: analyzer-worker
     image: ghcr.io/togethercrew/discord-analyzer:main
     command: python3 worker.py
     restart: unless-stopped
@@ -218,14 +230,8 @@ services:
       - monitoring
     <<: [*xl-resources-common]
 
-  ### API ###
-
-  redis-api:
-    volumes:
-      - ./redis/api.conf:/usr/local/etc/redis/redis.conf:ro
-    <<: [*redis]
-
   api:
+    container_name: api
     build:
       context: ../../tc-serverComm
       dockerfile: Dockerfile
