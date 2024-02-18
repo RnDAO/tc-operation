@@ -505,7 +505,7 @@ services:
   grafana:
     container_name: grafana
     image: grafana/grafana
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./grafana/provisioning/:/etc/grafana/provisioning
       - grafana_volume:/var/lib/grafana
@@ -523,6 +523,7 @@ services:
     image: prom/prometheus:latest
     command:
       - --config.file=/etc/prometheus/prometheus.yml
+    restart: unless-stopped
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_volume:/prometheus
@@ -531,12 +532,12 @@ services:
       - node-exporter
     networks:
       - monitoring
-    restart: unless-stopped
     <<: [*sm-resources-common]
 
   cadvisor:
     container_name: cadvisor
     image: gcr.io/cadvisor/cadvisor:latest
+    restart: unless-stopped
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -584,6 +585,7 @@ services:
     container_name: otel-collector
     image: otel/opentelemetry-collector:0.92.0
     command: [ "--config=/etc/otel-collector.yaml" ]
+    restart: unless-stopped
     volumes:
       - ./otel-collector/otel-collector.yaml:/etc/otel-collector.yaml
     networks:
@@ -595,6 +597,7 @@ services:
     container_name: tempo
     image: grafana/tempo:latest
     command: [ "-config.file=/etc/tempo.yaml" ]
+    restart: unless-stopped
     volumes:
       - ./tempo/tempo.yaml:/etc/tempo.yaml
       - ./tempo-data/:/tmp/tempo
@@ -609,6 +612,7 @@ services:
     container_name: watchtower
     image: containrrr/watchtower
     command: --interval 10 --http-api-metrics --http-api-token demotoken -d
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
