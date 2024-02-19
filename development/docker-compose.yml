@@ -566,7 +566,7 @@ services:
 
   node-exporter:
     container_name: node-exporter
-    image: prom/node-exporter:1.7.0
+    image: prom/node-exporter:v1.7.0
     restart: unless-stopped
     volumes:
       - /proc:/host/proc:ro
