@@ -504,7 +504,7 @@ services:
 
   grafana:
     container_name: grafana
-    image: grafana/grafana
+    image: grafana/grafana:10.3.3
     restart: unless-stopped
     volumes:
       - ./grafana/provisioning/:/etc/grafana/provisioning
@@ -520,7 +520,7 @@ services:
 
   prometheus:
     container_name: prometheus
-    image: prom/prometheus:latest
+    image: prom/prometheus:2.49.1
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     restart: unless-stopped
@@ -536,7 +536,7 @@ services:
 
   cadvisor:
     container_name: cadvisor
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:0.47.2
     restart: unless-stopped
     volumes:
       - /:/rootfs:ro
@@ -566,7 +566,7 @@ services:
 
   node-exporter:
     container_name: node-exporter
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:1.7.0
     restart: unless-stopped
     volumes:
       - /proc:/host/proc:ro
@@ -595,7 +595,7 @@ services:
 
   tempo:
     container_name: tempo
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.3.1
     command: [ "-config.file=/etc/tempo.yaml" ]
     restart: unless-stopped
     volumes:
@@ -619,7 +619,7 @@ services:
 
   watchtower:
     container_name: watchtower
-    image: containrrr/watchtower
+    image: containrrr/watchtower:1.7.1
     command: --interval 10 --http-api-metrics --http-api-token demotoken -d
     restart: unless-stopped
     volumes:
