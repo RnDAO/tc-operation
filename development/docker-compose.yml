@@ -520,7 +520,7 @@ services:
 
   prometheus:
     container_name: prometheus
-    image: prom/prometheus:2.49.1
+    image: prom/prometheus:v2.49.1
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     restart: unless-stopped
