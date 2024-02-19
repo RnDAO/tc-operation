@@ -600,7 +600,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./tempo/tempo.yaml:/etc/tempo.yaml
-      - ./tempo-data/:/tmp/tempo
+      - tempo_data:/tmp/tempo
     networks:
       - monitoring
       - production
@@ -644,6 +644,7 @@ volumes:
   airflow_logs:
   airflow_plugins:
   airflow_sources:
+  tempo_data:
 
 networks:
   production:

@@ -20,3 +20,5 @@ dump.rdb
 **/.env
 *.DS_Store
 tc-ops/*
+
+*.key
