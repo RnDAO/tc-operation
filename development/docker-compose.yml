@@ -167,7 +167,7 @@ services:
       - 25672:15672
     volumes:
       - rmq_data_container:/var/lib/rabbitmq/
-      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
     env_file:
       - ./.env.rabbitmq
     networks:
