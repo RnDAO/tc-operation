@@ -606,6 +606,15 @@ services:
       - production
     <<: [*sm-resources-common]
 
+  pyroscope:
+    container_name: pyroscope
+    image: grafana/pyroscope:1.4.0
+    restart: unless-stopped
+    networks:
+      - monitoring
+      - production
+    <<: [*sm-resources-common]
+
   ### SERVICE MANAGEMENT ###
 
   watchtower:
