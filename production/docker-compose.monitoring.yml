@@ -107,3 +107,11 @@ services:
     networks:
       - monitoring
     <<: *logging
+
+  pyroscope:
+    container_name: pyroscope
+    image: grafana/pyroscope:1.4.0
+    restart: unless-stopped
+    networks:
+      - monitoring
+    <<: *logging
