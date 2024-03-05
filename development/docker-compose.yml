@@ -502,7 +502,7 @@ services:
 
   ### ADMIN
 
-  admin:
+  admin-panel:
     container_name: admin-panel
     image: ghcr.io/togethercrew/admin-panel:main
     restart: always
