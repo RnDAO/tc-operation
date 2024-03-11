@@ -93,7 +93,7 @@ x-redis:
 
 x-airflow-common:
   &airflow-common
-  image: ghcr.io/togethercrew/airflow-dags:main
+  image: ghcr.io/togethercrew/airflow-dags:pr-65
   env_file:
     &airflow-common-env
     - ./.env.airflow
